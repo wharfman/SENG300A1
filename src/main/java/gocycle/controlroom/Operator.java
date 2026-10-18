@@ -3,10 +3,7 @@ package gocycle.controlroom;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * Control-room staff member. Zones are held by id because the operator console runs in its own
- * process and sees the network only through the shared snapshot.
- */
+/** Control-room staff member who watches the dashboard for the zones they oversee. */
 public class Operator {
     private final String operatorId;
     private final String name;
