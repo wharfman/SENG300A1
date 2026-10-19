@@ -6,6 +6,8 @@
  */
 package gocycle.payments;
 
+import gocycle.common.Message;
+
 import java.util.Objects;
 
 /** City transit card payments. The full number is kept but only its last four digits are shown. */
@@ -22,7 +24,7 @@ public class TransitCardPayment extends AbstractPaymentMethod {
     }
 
     @Override
-    public String describe() {
-        return "Transit card **** " + lastFour(cardNumber);
+    public Message describe() {
+        return new Message("payment.card", getType(), "**** " + lastFour(cardNumber));
     }
 }

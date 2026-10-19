@@ -2,7 +2,7 @@
  * GoCycle - SENG 300 Assignment 1
  *
  * Returned by Vehicle.checkRentable(); TripService turns it into a TripException so the station kiosk
- * can show the reason in the rider's language.
+ * can show the reason in the system language.
  */
 package gocycle.fleet;
 

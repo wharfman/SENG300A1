@@ -7,6 +7,7 @@
 package gocycle.app;
 
 import gocycle.common.Ansi;
+import gocycle.stations.LocalizationService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,10 +16,12 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Numbered-menu input and output for the rider terminal. Every read blocks until a line arrives, re-prompts
- * on invalid input, and throws {@link InputClosedException} at end of input. Not thread-safe; only the menu
+ * on invalid input, and throws {@link InputClosedException} at end of input. Its own fixed text ("Back",
+ * hints) follows the system language. Not thread-safe; only the menu
  * thread uses it, and never while holding the {@link GoCycleSystem#atomically} lock.
  */
 final class Console {
@@ -28,10 +31,12 @@ final class Console {
 
     private final BufferedReader in;
     private final PrintStream out;
+    private final LocalizationService l10n;
 
-    Console(InputStream in, PrintStream out) {
+    Console(InputStream in, PrintStream out, LocalizationService l10n) {
         this.in = new BufferedReader(new InputStreamReader(in));
         this.out = out;
+        this.l10n = l10n;
     }
 
     void say(String text) {
@@ -85,19 +90,26 @@ final class Console {
             } catch (NumberFormatException ignored) {
                 // fall through to the hint
             }
-            say(Ansi.paint("Please enter a number from " + min + " to " + max + ".", Ansi.YELLOW));
+            say(Ansi.paint(l10n.text("console.number.range", min, max), Ansi.YELLOW));
         }
     }
 
-    /** Appends " (y/n): " to the prompt and re-prompts until the answer is y, yes, n or no (any case). */
+    /**
+     * Appends " (y/n): " (" (o/n) : " in French) to the prompt and re-prompts until the answer is yes or no.
+     * English and French answers are both accepted whatever the language: y, yes, o, oui, n, no or non.
+     */
     boolean confirm(String prompt) {
         while (true) {
-            String line = readLine(prompt + " (y/n): ").toLowerCase();
-            if (line.equals("y") || line.equals("yes")) {
-                return true;
-            }
-            if (line.equals("n") || line.equals("no")) {
-                return false;
+            String line = readLine(prompt + l10n.text("console.yes.no")).toLowerCase(Locale.ROOT);
+            switch (line) {
+                case "y", "yes", "o", "oui" -> {
+                    return true;
+                }
+                case "n", "no", "non" -> {
+                    return false;
+                }
+                default -> {
+                }
             }
         }
     }
@@ -109,11 +121,11 @@ final class Console {
         for (int i = 0; i < options.size(); i++) {
             say("  " + (i + 1) + ") " + options.get(i));
         }
-        say("  0) Back");
+        say("  0) " + l10n.text("console.back"));
         return readInt("> ", 0, options.size()) - 1;
     }
 
     void pause() {
-        readLine(Ansi.paint("Press Enter to return to the menu...", Ansi.DIM));
+        readLine(Ansi.paint(l10n.text("console.pause"), Ansi.DIM));
     }
 }

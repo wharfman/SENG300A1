@@ -5,6 +5,7 @@
  */
 package gocycle.pricing;
 
+import gocycle.common.Message;
 import gocycle.common.Money;
 
 /**
@@ -34,7 +35,7 @@ public abstract class BasePricing implements PricingStrategy {
     }
 
     @Override
-    public String describe() {
-        return Money.format(unlockFee) + " unlock + " + Money.format(perMinuteRate) + "/min";
+    public Message describe() {
+        return new Message("fare.base", Money.format(unlockFee), Money.format(perMinuteRate));
     }
 }

@@ -6,6 +6,8 @@
  */
 package gocycle.pricing;
 
+import gocycle.common.Message;
+
 /**
  * Calculates what a trip costs from its length. Each rider kind supplies its own implementation
  * (Strategy pattern); {@link LongTripSurcharge} decorates it with the long-trip rule.
@@ -17,6 +19,6 @@ public interface PricingStrategy {
      */
     double calculate(long minutes);
 
-    /** One-line summary shown to riders, e.g. "$1.25 unlock + $0.35/min". */
-    String describe();
+    /** One-line summary shown to riders, e.g. "$1.25 unlock + $0.35/min" once translated. */
+    Message describe();
 }

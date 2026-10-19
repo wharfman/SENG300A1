@@ -6,21 +6,14 @@
  */
 package gocycle.riders;
 
-/** Where a rider wants receipts delivered. */
+/**
+ * Where a rider wants receipts delivered. Screens show the constant translated by {@code LocalizationService}
+ * (key {@code ReceiptDelivery.<CONSTANT>}).
+ */
 public enum ReceiptDelivery {
-    APP("Phone app"),
-    EMAIL("Email"),
-    BOTH("App and email");
-
-    private final String label;
-
-    ReceiptDelivery(String label) {
-        this.label = label;
-    }
-
-    public String getLabel() {
-        return label;
-    }
+    APP,
+    EMAIL,
+    BOTH;
 
     /** Whether receipts should go out on {@code channel}; {@link #BOTH} includes every channel. */
     public boolean includes(ReceiptDelivery channel) {

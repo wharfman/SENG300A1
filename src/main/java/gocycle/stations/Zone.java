@@ -15,7 +15,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A neighbourhood with its own allowed payment methods and branding. The allowed payment types are fixed at
@@ -51,11 +50,6 @@ public class Zone {
     public void addStation(DockingStation station) {
         stations.add(station);
         station.assignZone(this);
-    }
-
-    /** Comma-separated payment labels for display, e.g. in the {@code error.payment.zone} kiosk message. */
-    public String describeAllowedPayments() {
-        return allowedPayments.stream().map(PaymentType::getLabel).collect(Collectors.joining(", "));
     }
 
     public String getZoneId() {

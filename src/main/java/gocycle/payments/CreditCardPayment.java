@@ -6,6 +6,8 @@
  */
 package gocycle.payments;
 
+import gocycle.common.Message;
+
 /** Credit card payments. Only the masked number is kept. */
 public class CreditCardPayment extends AbstractPaymentMethod {
     private final String maskedNumber;
@@ -20,7 +22,7 @@ public class CreditCardPayment extends AbstractPaymentMethod {
     }
 
     @Override
-    public String describe() {
-        return "Credit card " + maskedNumber;
+    public Message describe() {
+        return new Message("payment.card", getType(), maskedNumber);
     }
 }

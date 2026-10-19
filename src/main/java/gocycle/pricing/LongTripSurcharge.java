@@ -5,6 +5,7 @@
  */
 package gocycle.pricing;
 
+import gocycle.common.Message;
 import gocycle.common.Money;
 
 import java.util.Objects;
@@ -43,7 +44,7 @@ public class LongTripSurcharge implements PricingStrategy {
     }
 
     @Override
-    public String describe() {
-        return inner.describe() + ", +" + Money.format(surcharge) + " over " + thresholdMinutes + " min";
+    public Message describe() {
+        return new Message("fare.surcharge", inner.describe(), Money.format(surcharge), thresholdMinutes);
     }
 }
