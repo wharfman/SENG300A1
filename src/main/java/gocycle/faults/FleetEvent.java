@@ -24,6 +24,8 @@ public class FleetEvent {
         OUT_OF_SERVICE,
         BACK_IN_SERVICE,
         REBALANCED,
+        /** A control-room move was abandoned because the destination would not lock; the vehicle stayed put. */
+        REBALANCE_FAILED,
         /** A copy of a receipt could not be delivered; the trip itself was completed and charged. */
         RECEIPT_FAILED
     }

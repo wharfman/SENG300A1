@@ -31,34 +31,43 @@ public class ControlRoomService {
 
     /**
      * Moves a docked vehicle to the first free point at another station, keeping it out of service if it
-     * already was; otherwise it ends up available.
+     * already was; otherwise it ends up available. If no point at {@code to} will lock, the vehicle stays
+     * where it was and a {@code REBALANCE_FAILED} event is published instead.
      *
+     * @return whether the vehicle was moved
      * @throws IllegalArgumentException if {@code from} and {@code to} are the same station
-     * @throws IllegalStateException if {@code v} is not docked at {@code from}, {@code to} is full, or the
-     *         new point will not lock (in that last case the vehicle has already left {@code from})
+     * @throws IllegalStateException if {@code v} is not docked at {@code from} or {@code to} is full
      */
-    public void rebalance(Vehicle v, DockingStation from, DockingStation to) {
+    public boolean rebalance(Vehicle v, DockingStation from, DockingStation to) {
         if (from == to) {
             throw new IllegalArgumentException("Pick two different stations");
         }
-        DockingPoint point = from.findPointHolding(v)
+        DockingPoint origin = from.findPointHolding(v)
                 .orElseThrow(() -> new IllegalStateException(v + " is not docked at " + from));
         if (!to.hasFreePoint()) {
             throw new IllegalStateException(to + " has no free point");
         }
         boolean wasOutOfService = v.getStatus() == VehicleStatus.OUT_OF_SERVICE;
-        point.release();
-        // IN_TRANSIT is only held while the vehicle is between points; the status is restored below. If
-        // dockAnywhere throws, the vehicle is left IN_TRANSIT and docked nowhere.
         v.markInTransit();
-        to.dockAnywhere(v);
+        // The vehicle is released from its origin only once the destination has locked it, so a latch that
+        // never catches leaves it where it was instead of docked nowhere. For that moment both points hold
+        // it, which nothing else can see: callers hold the system lock.
+        boolean moved = to.tryDockAnywhere(v).isPresent();
+        if (moved) {
+            origin.release();
+        }
+        // IN_TRANSIT never outlives this call, whether or not the move worked.
         if (wasOutOfService) {
             v.markOutOfService();
         } else {
             v.markAvailable();
         }
-        publisher.publish(new FleetEvent(FleetEvent.Kind.REBALANCED, v.getVehicleId(),
-                v + " moved from " + from + " to " + to, clock.now()));
+        publisher.publish(moved
+                ? new FleetEvent(FleetEvent.Kind.REBALANCED, v.getVehicleId(),
+                        v + " moved from " + from + " to " + to, clock.now())
+                : new FleetEvent(FleetEvent.Kind.REBALANCE_FAILED, v.getVehicleId(),
+                        v + " stayed at " + from + ": no point at " + to + " would lock", clock.now()));
+        return moved;
     }
 
     /**
