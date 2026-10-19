@@ -2,7 +2,7 @@
  * GoCycle - SENG 300 Assignment 1
  *
  * Core entity of the trips package: created and driven through its lifecycle by {@link TripService}, and
- * read by the rider app, the operator dashboard and the fleet simulator (which drains batteries of
+ * read by the rider app and the fleet simulator (which drains batteries of
  * active trips).
  */
 package gocycle.trips;

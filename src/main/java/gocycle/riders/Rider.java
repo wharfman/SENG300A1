@@ -2,7 +2,7 @@
  * GoCycle - SENG 300 Assignment 1
  *
  * Root of the riders package. TripService records trips against it, receipt senders deliver to it, and
- * StationKiosk reads its audio-assist preference.
+ * RiderApp reads its receipt preference.
  */
 package gocycle.riders;
 
@@ -28,7 +28,6 @@ public abstract class Rider {
     private final String riderId;
     private final String name;
     private final String email;
-    private boolean audioAssist;
     private ReceiptDelivery receiptDelivery = ReceiptDelivery.APP;
     private final List<Trip> trips = new ArrayList<>();
     private final List<Receipt> appInbox = new ArrayList<>();
@@ -85,15 +84,6 @@ public abstract class Rider {
 
     public String getEmail() {
         return email;
-    }
-
-    /** Whether kiosk screens are also read aloud to this rider. */
-    public boolean isAudioAssist() {
-        return audioAssist;
-    }
-
-    public void setAudioAssist(boolean audioAssist) {
-        this.audioAssist = audioAssist;
     }
 
     public ReceiptDelivery getReceiptDelivery() {

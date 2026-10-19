@@ -15,16 +15,14 @@ import java.util.function.BooleanSupplier;
 /**
  * Holds at most one vehicle and reports whether it is really locked.
  *
- * <p>A dock attempt whose latch does not catch leaves the point free, so with the current code an occupied
- * point is always locked and {@link #isLocked()} equals {@code !isFree()}. {@code TripService.confirmDocked}
- * still checks the lock explicitly because that is the rule a trip may only end on. Not thread-safe: callers
- * go through {@code GoCycleSystem.atomically}.
+ * <p>A dock attempt whose latch does not catch leaves the point free, so a point holds a vehicle only while
+ * it is locked: {@link #isLocked()} is derived from that rather than kept as separate state. Not
+ * thread-safe: callers go through {@code GoCycleSystem.atomically}.
  */
 public class DockingPoint {
     private final int pointNumber;
     private final BooleanSupplier lockSensor;
     private Vehicle vehicle;
-    private boolean locked;
 
     /**
      * @param pointNumber 1-based position within the station, shown to riders on the kiosk
@@ -46,7 +44,6 @@ public class DockingPoint {
             return false;
         }
         vehicle = v;
-        locked = true;
         return true;
     }
 
@@ -62,7 +59,6 @@ public class DockingPoint {
         }
         Vehicle released = vehicle;
         vehicle = null;
-        locked = false;
         return released;
     }
 
@@ -71,7 +67,7 @@ public class DockingPoint {
     }
 
     public boolean isLocked() {
-        return locked;
+        return vehicle != null;
     }
 
     public Vehicle getVehicle() {

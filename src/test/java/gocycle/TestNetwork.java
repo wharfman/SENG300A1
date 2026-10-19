@@ -17,7 +17,6 @@ import gocycle.fleet.VehicleFactory;
 import gocycle.fleet.VehicleType;
 import gocycle.payments.PaymentType;
 import gocycle.riders.CasualRider;
-import gocycle.stations.ConsoleTextToSpeech;
 import gocycle.stations.DockingStation;
 import gocycle.stations.InMemoryLocalizationService;
 import gocycle.stations.StationKiosk;
@@ -42,7 +41,7 @@ import java.util.List;
  * <p>Assumptions tests rely on: stations start empty (use {@link #park}); the simulated clock starts at
  * 2026-10-18 09:00 and only moves through {@link #advanceMinutes}, and nothing drains or charges batteries
  * unless a test calls {@code ride}/{@code rest}; every published event is recorded in {@link #events}; the
- * maintenance crew is subscribed but no operator dashboard is; kiosk output is discarded; the only
+ * maintenance crew is subscribed; kiosk output is discarded; the only
  * receipt sender is the in-app one. Tests hold the network in an instance field, so JUnit gives each test
  * a fresh one.
  */
@@ -91,9 +90,7 @@ public final class TestNetwork {
 
     private DockingStation station(String name, double latitude, double longitude, int points) {
         InMemoryLocalizationService localization = new InMemoryLocalizationService();
-        StationKiosk kiosk = new StationKiosk(localization,
-                new ConsoleTextToSpeech(new PrintStream(OutputStream.nullOutputStream()), localization),
-                new PrintStream(OutputStream.nullOutputStream()));
+        StationKiosk kiosk = new StationKiosk(localization, new PrintStream(OutputStream.nullOutputStream()));
         // The lambda reads the field on every dock, so tests can change lockWorks after construction.
         DockingStation station = new DockingStation(name, name, latitude, longitude, points, kiosk, () -> lockWorks);
         zone.addStation(station);

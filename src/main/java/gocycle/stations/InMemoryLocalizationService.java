@@ -55,10 +55,7 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("kiosk.fault.noted", "Thank you. We have noted the problem ({1}) on {0}.");
         fr("kiosk.fault.noted", "Merci. Nous avons noté le problème ({1}) sur le véhicule {0}.");
 
-        en("kiosk.read.aloud", "((( read aloud, {0} )))");
-        fr("kiosk.read.aloud", "((( lecture à voix haute, {0} )))");
-
-        en("error.trip.active", "You already have an active trip ({0}). Please return that vehicle first.");
+                en("error.trip.active", "You already have an active trip ({0}). Please return that vehicle first.");
         fr("error.trip.active", "Vous avez déjà un trajet en cours ({0}). Veuillez d'abord rendre ce véhicule.");
 
         en("error.vehicle.unavailable", "{0} cannot be rented right now ({1}).");
@@ -109,8 +106,8 @@ public class InMemoryLocalizationService implements LocalizationService {
         fr("menu.6", "Signaler un problème avec un véhicule");
         en("menu.7", "My trips and receipts");
         fr("menu.7", "Mes trajets et reçus");
-        en("menu.8", "Language, read-aloud and receipt settings");
-        fr("menu.8", "Langue, lecture à voix haute et reçus");
+        en("menu.8", "Language and receipt settings");
+        fr("menu.8", "Langue et reçus");
         en("menu.9", "Exit");
         fr("menu.9", "Quitter");
 
@@ -256,12 +253,6 @@ public class InMemoryLocalizationService implements LocalizationService {
         fr("settings.title", "Paramètres : {0}");
         en("settings.language", "Language: {0}");
         fr("settings.language", "Langue : {0}");
-        en("settings.read.aloud", "Read screens aloud: {0}");
-        fr("settings.read.aloud", "Lecture des écrans à voix haute : {0}");
-        en("settings.on", "on");
-        fr("settings.on", "activée");
-        en("settings.off", "off");
-        fr("settings.off", "désactivée");
         en("settings.receipts", "Receipts: {0}");
         fr("settings.receipts", "Reçus : {0}");
         en("settings.choose.language", "Screen language");

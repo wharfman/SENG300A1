@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Notified of every fault that needs a repair. Each repair takes {@link #REPAIR_TIME}; a vehicle
@@ -70,11 +69,6 @@ public class MaintenanceCrew implements FleetEventListener {
                 }
             }
         }
-    }
-
-    /** When the repair for {@code report} is due; empty once it is done or if it never needed one. */
-    public Optional<LocalDateTime> getRepairDue(FaultReport report) {
-        return Optional.ofNullable(jobs.get(report));
     }
 
     private boolean hasJobFor(Vehicle vehicle) {

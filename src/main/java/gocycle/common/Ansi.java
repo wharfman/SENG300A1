@@ -1,11 +1,9 @@
 /*
  * GoCycle - SENG 300 Assignment 1
  *
- * Shared terminal styling used by RiderApp, the operator dashboard and the station kiosks.
+ * Shared terminal styling used by RiderApp, the console and the station kiosks.
  */
 package gocycle.common;
-
-import java.util.regex.Pattern;
 
 /**
  * Minimal ANSI styling for the terminal UI. Set the NO_COLOR environment variable to turn it off. When it is
@@ -22,9 +20,6 @@ public final class Ansi {
     public static final String GREEN = "\u001b[32m";
     public static final String YELLOW = "\u001b[33m";
     public static final String CYAN = "\u001b[36m";
-
-    // Matches any CSI escape sequence: colours, and also cursor codes such as ESC [?25l.
-    private static final Pattern CODES = Pattern.compile("\u001b\\[[0-9;?]*[A-Za-z]");
 
     private Ansi() {
     }
@@ -59,11 +54,5 @@ public final class Ansi {
         int g = Integer.parseInt(hex.substring(3, 5), 16);
         int b = Integer.parseInt(hex.substring(5, 7), 16);
         return "\u001b[" + mode + ";2;" + r + ";" + g + ";" + b + "m";
-    }
-
-    /** Pads to a visible width, ignoring colour codes. Text already that wide or wider is returned unchanged. */
-    public static String pad(String text, int width) {
-        int gap = width - CODES.matcher(text).replaceAll("").length();
-        return gap > 0 ? text + " ".repeat(gap) : text;
     }
 }

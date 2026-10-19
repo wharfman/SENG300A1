@@ -8,19 +8,11 @@ package gocycle.payments;
 
 import gocycle.common.Message;
 
-import java.util.Objects;
-
 /**
  * Phone wallet payments, identified by the wallet's payment token. The token is never shown on screen,
  * so {@link #describe()} is just the payment kind.
  */
 public class PhoneWalletPayment extends AbstractPaymentMethod {
-    private final String walletToken;
-
-    public PhoneWalletPayment(String walletToken) {
-        this.walletToken = Objects.requireNonNull(walletToken);
-    }
-
     @Override
     public PaymentType getType() {
         return PaymentType.PHONE_WALLET;
@@ -29,9 +21,5 @@ public class PhoneWalletPayment extends AbstractPaymentMethod {
     @Override
     public Message describe() {
         return new Message("payment.wallet", getType());
-    }
-
-    public String getWalletToken() {
-        return walletToken;
     }
 }

@@ -2,7 +2,7 @@
  * GoCycle - SENG 300 Assignment 1
  *
  * Groups stations under one set of business rules. GoCycleSystem builds zones from config/zones.properties,
- * TripService checks the payment rule when a trip starts, and the operator dashboard reports per zone.
+ * TripService checks the payment rule when a trip starts.
  */
 package gocycle.stations;
 

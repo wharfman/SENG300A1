@@ -71,24 +71,10 @@ public class ControlRoomService {
     }
 
     /**
-     * A vehicle on a trip is only flagged and goes out of service when docked (see
-     * {@link Vehicle#markOutOfService()}). Does not file a fault report, so no repair is scheduled.
-     */
-    public void takeOutOfService(Vehicle v) {
-        v.markOutOfService();
-        publisher.publish(new FleetEvent(FleetEvent.Kind.OUT_OF_SERVICE, v.getVehicleId(),
-                v + " taken out of service by the control room", clock.now()));
-    }
-
-    public void returnToService(Vehicle v) {
-        returnToService(v, "returned to service by the control room");
-    }
-
-    /**
      * Makes the vehicle available and clears any pending out-of-service flag; a vehicle on a trip stays in
      * use. Does not resolve open fault reports.
      *
-     * @param reason completes the activity-feed line that starts with the vehicle id
+     * @param reason completes the event message that starts with the vehicle id
      */
     public void returnToService(Vehicle v, String reason) {
         v.markAvailable();

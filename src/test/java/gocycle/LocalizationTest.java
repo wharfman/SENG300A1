@@ -13,7 +13,6 @@ import gocycle.fleet.VehicleType;
 import gocycle.payments.CreditCardPayment;
 import gocycle.payments.PaymentType;
 import gocycle.riders.ReceiptDelivery;
-import gocycle.stations.ConsoleTextToSpeech;
 import gocycle.stations.DockingPoint;
 import gocycle.stations.InMemoryLocalizationService;
 import gocycle.stations.StationKiosk;
@@ -109,12 +108,10 @@ class LocalizationTest {
     }
 
     @Test
-    void kioskFollowsTheGlobalLanguageWhoeverIsServed() {
-        TestNetwork net = new TestNetwork();
+    void kioskFollowsTheGlobalLanguage() {
         ByteArrayOutputStream screen = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(screen, true, StandardCharsets.UTF_8);
-        StationKiosk kiosk = new StationKiosk(l10n, new ConsoleTextToSpeech(out, l10n), out);
-        kiosk.serve(net.rider);
+        StationKiosk kiosk = new StationKiosk(l10n, out);
 
         kiosk.announce("error.vehicle.unavailable", "EB-1", VehicleStatus.OUT_OF_SERVICE);
         l10n.setLanguage(Locale.FRENCH);

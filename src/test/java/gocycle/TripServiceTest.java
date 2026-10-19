@@ -61,7 +61,7 @@ class TripServiceTest {
     @Test
     void zoneRefusesPaymentMethodsItDoesNotAllow() {
         Vehicle bike = net.park(net.a, VehicleType.PEDAL_BIKE, "PB-1", 0);
-        PhoneWalletPayment wallet = new PhoneWalletPayment("token");
+        PhoneWalletPayment wallet = new PhoneWalletPayment();
 
         TripException e = assertThrows(TripException.class, () -> net.trips.startTrip(net.rider, net.a, bike, wallet));
 
