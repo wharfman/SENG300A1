@@ -121,6 +121,37 @@ class TripServiceTest {
     }
 
     @Test
+    void declinedChargeUnlocksTheVehicleAndKeepsTheTripRunning() {
+        CreditCardPayment declining = new CreditCardPayment("4111 1111 1111 1111") {
+            @Override
+            public boolean charge(double amount) {
+                return false;
+            }
+        };
+        Vehicle bike = net.park(net.a, VehicleType.PEDAL_BIKE, "PB-1", 0);
+        Trip trip = net.trips.startTrip(net.rider, net.a, bike, declining);
+        net.advanceMinutes(10);
+
+        // Two return attempts: before the fix the second one locked the bike into a second point.
+        for (int attempt = 0; attempt < 2; attempt++) {
+            net.trips.requestReturn(trip, net.c);
+            DockingPoint point = net.c.getFreePoints().get(0);
+            assertTrue(point.dock(bike));
+
+            TripException e = assertThrows(TripException.class, () -> net.trips.confirmDocked(trip, point));
+
+            assertEquals("error.payment.declined", e.getMessageKey());
+            assertTrue(point.isFree(), "vehicle unlocked again");
+        }
+        assertTrue(net.c.findPointHolding(bike).isEmpty());
+        assertEquals(2, net.c.getFreePoints().size());
+        assertEquals(Trip.Status.AWAITING_DOCK, trip.getStatus());
+        assertEquals(VehicleStatus.IN_USE, bike.getStatus());
+        assertEquals(TripService.DEPOSIT_AMOUNT, declining.getHeldAmount(), 1e-9);
+        assertTrue(net.eventsOf(FleetEvent.Kind.TRIP_ENDED).isEmpty());
+    }
+
+    @Test
     void failedEmailReceiptStillEndsTheTripAndDeliversTheOtherCopies() {
         ReceiptSender brokenEmail = new ReceiptSender() {
             @Override
