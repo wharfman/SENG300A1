@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Application layer: wires every domain package together for the terminal program. RiderApp owns one
+ * instance and reaches all services, stations, vehicles and riders through it.
+ */
 package gocycle.app;
 
 import gocycle.common.SimulationClock;
@@ -57,6 +63,11 @@ import java.util.stream.Collectors;
  * Composition root: builds the services, seeds the city's stations, vehicles and riders, and runs
  * the simulated clock. All domain access goes through {@link #atomically} so the clock thread and
  * the menu never interleave.
+ *
+ * <p>The domain objects are not thread-safe, so the lists and services returned by the accessors are
+ * live state and must only be read or changed inside {@link #atomically}. Fleet events are delivered
+ * synchronously on the publishing thread, so subscribers (the maintenance crew, the operator dashboard
+ * and the rider app) also run while that lock is held. The station list is fixed after construction.
  */
 public final class GoCycleSystem {
     public static final double MEMBER_MONTHLY_FEE = 15.00;
@@ -81,16 +92,30 @@ public final class GoCycleSystem {
     private ScheduledExecutorService ticker;
     private int nextRiderNumber = 1;
 
+    /**
+     * Builds and seeds the whole network. Does not start the clock; call {@link #startClock()} for that.
+     *
+     * @param config          zone settings keyed {@code <zoneId>.<setting>} (see {@code config/zones.properties});
+     *                        may be empty, in which case the built-in zone names, all payment types and the
+     *                        default branding are used
+     * @param dataDir         emailed receipts are written to its {@code outbox} subfolder
+     * @param kioskScreen     where every station kiosk and the operator dashboard print
+     * @param random          drives the lock sensors and the simulator's random faults
+     * @param lockFailureRate probability (0 to 1) that a docking point's latch fails to catch on one attempt
+     * @throws IllegalArgumentException if a zone lists a payment type that is not a {@link PaymentType} name
+     */
     public GoCycleSystem(Properties config, Path dataDir, PrintStream kioskScreen, Random random, double lockFailureRate) {
         faultService = new FaultService(clock, publisher);
         ControlRoomService controlRoom = new ControlRoomService(clock, publisher);
         crew = new MaintenanceCrew("Crew A", clock, controlRoom);
         publisher.subscribe(crew);
 
+        // Each station gets its own kiosk, but they all print to the same screen.
         Supplier<StationKiosk> kiosks = () -> new StationKiosk(localization, new ConsoleTextToSpeech(kioskScreen), kioskScreen);
         seedNetwork(config, kiosks, () -> random.nextDouble() >= lockFailureRate);
         seedRiders();
 
+        // Built after seeding: the locator and the simulator need the final station list.
         outbox = dataDir.resolve("outbox");
         tripService = new TripService(clock, new StationLocator(stations),
                 List.of(new AppReceiptSender(), new EmailReceiptSender(outbox)), publisher);
@@ -102,7 +127,12 @@ public final class GoCycleSystem {
                 zones.stream().map(Zone::getZoneId).collect(Collectors.toSet()), dashboard);
     }
 
-    /** Builds the system from {@code config/zones.properties} and the {@code gocycle.*} system properties. */
+    /**
+     * Builds the system from {@code config/zones.properties} (resolved against the working directory; a missing
+     * file means defaults) and the {@code gocycle.lockFailureRate} and {@code gocycle.dataDir} system properties.
+     *
+     * @throws UncheckedIOException if the config file exists but cannot be read
+     */
     public static GoCycleSystem create() {
         Properties config = new Properties();
         if (Files.exists(CONFIG_FILE)) {
@@ -117,13 +147,14 @@ public final class GoCycleSystem {
         return new GoCycleSystem(config, dataDir(), System.out, new Random(), lockFailureRate);
     }
 
-    /** Where emailed receipts are written. */
+    /** Data directory from {@code gocycle.dataDir} (default {@code data}); emailed receipts go to its {@code outbox}. */
     public static Path dataDir() {
         return Path.of(System.getProperty("gocycle.dataDir", "data"));
     }
 
     // ---------------------------------------------------------------- seeding
 
+    /** Creates the two Calgary zones and their stations, each partly filled with vehicles. */
     private void seedNetwork(Properties config, Supplier<StationKiosk> kiosks, BooleanSupplier lockSensor) {
         VehicleFactory factory = new VehicleFactory(faultService);
         Zone downtown = zone(config, "downtown", "Downtown");
@@ -157,7 +188,10 @@ public final class GoCycleSystem {
         park(sunnyside, factory.create(VehicleType.E_BIKE, "EB-205", 18));
     }
 
-    /** Reads {@code <id>.name}, {@code <id>.payments} and the branding keys for one zone. */
+    /**
+     * Reads {@code <id>.name}, {@code <id>.payments} and the branding keys for one zone. A missing or blank
+     * {@code payments} list allows every payment type.
+     */
     private Zone zone(Properties config, String id, String defaultName) {
         Properties own = new Properties();
         String prefix = id + ".";
@@ -187,11 +221,13 @@ public final class GoCycleSystem {
         return station;
     }
 
+    /** Docks a newly built vehicle at seeding time and registers it with the fleet. */
     private void park(DockingStation station, Vehicle vehicle) {
         station.dockAnywhere(vehicle);
         vehicles.add(vehicle);
     }
 
+    /** One demo rider of each kind, with settings that show off the French kiosk, read-aloud and email receipts. */
     private void seedRiders() {
         signUpCasual("Alex Chen", "alex.chen@example.com");
         Rider sam = signUpMember("Sam Okafor", "sam.okafor@example.com");
@@ -203,14 +239,21 @@ public final class GoCycleSystem {
 
     // ---------------------------------------------------------------- sign-up
 
+    // Sign-up methods must be called inside atomically; they append to the shared rider list.
+
     public Rider signUpCasual(String name, String email) {
         return register(new CasualRider(nextRiderId(), name, email));
     }
 
+    /**
+     * The member's fee is recorded as {@link #MEMBER_MONTHLY_FEE} dollars a month but never billed by the system;
+     * the membership is active until one month from today.
+     */
     public Rider signUpMember(String name, String email) {
         return register(new Member(nextRiderId(), name, email, MEMBER_MONTHLY_FEE, LocalDate.now().plusMonths(1)));
     }
 
+    /** Student status counts as verified for eight months from today. */
     public Rider signUpStudent(String name, String email, String studentNumber) {
         return register(new Student(nextRiderId(), name, email, studentNumber, LocalDate.now().plusMonths(8)));
     }
@@ -226,7 +269,10 @@ public final class GoCycleSystem {
 
     // ---------------------------------------------------------------- running
 
-    /** Runs {@code action} with exclusive access to the network. */
+    /**
+     * Runs {@code action} with exclusive access to the network and returns its result. The lock is a plain
+     * monitor, so nested calls from the same thread are fine. Exceptions thrown by {@code action} propagate.
+     */
     public <T> T atomically(Supplier<T> action) {
         synchronized (lock) {
             return action.get();
@@ -240,7 +286,10 @@ public final class GoCycleSystem {
         });
     }
 
-    /** Advances simulated time every real second, e.g. 15 simulated seconds per tick by default. */
+    /**
+     * Starts a daemon thread that advances simulated time by {@code gocycle.simSecondsPerTick} seconds
+     * (default 15) every real second, inside {@link #atomically}. Call at most once.
+     */
     public void startClock() {
         Duration perTick = Duration.ofSeconds(Integer.getInteger("gocycle.simSecondsPerTick", DEFAULT_SIM_SECONDS_PER_TICK));
         ticker = Executors.newSingleThreadScheduledExecutor(task -> {
@@ -252,11 +301,13 @@ public final class GoCycleSystem {
             try {
                 atomically(() -> simulator.advance(perTick));
             } catch (RuntimeException e) {
+                // A scheduled task that throws is silently cancelled, so log and keep the clock running.
                 System.err.println("Simulation tick failed: " + e);
             }
         }, 1, 1, TimeUnit.SECONDS);
     }
 
+    /** Stops the clock thread, if it was started. Safe to call more than once. */
     public void shutdown() {
         if (ticker != null) {
             ticker.shutdownNow();

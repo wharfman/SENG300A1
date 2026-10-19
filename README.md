@@ -1,9 +1,8 @@
 # SENG300 Assignment 1 - GoCycle
 
-# Emails
-
-Gavin Kyle - 30196910 - gavin.kyle@ucalgary.ca
-
+```text
+Gavin Kyle - 30196910 
+```
 ## Run it
 
 You need a JDK 24+ and Maven.
@@ -23,7 +22,7 @@ You need a JDK 24+ and Maven.
 8. Language, read-aloud and receipt settings
 9. Exit
 
-Seeded data: Eau Claire starts full (to try the redirect), ES-301 and EB-205 are below 20% battery, Kensington doesn't accept credit cards, Sam prefers French, and Priya has read-aloud and email receipts on. Zone payments and branding are set in `config/zones.properties`.
+Seeded data: Eau Claire starts full (to try the redirect), ES-301 and EB-205 are below 20% battery, Kensington doesn't accept credit cards. Zone payments and branding are set in `config/zones.properties`.
 
 ## Notes
 

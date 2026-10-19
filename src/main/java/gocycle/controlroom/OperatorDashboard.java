@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Control-room console view: subscribes to fleet events and reads stations, vehicles, trips and
+ * faults directly from the services it is given.
+ */
 package gocycle.controlroom;
 
 import gocycle.common.Ansi;
@@ -29,7 +35,9 @@ import java.util.Objects;
 
 /**
  * Live view of every station, vehicle, trip and fault for the control room. Subscribes to fleet
- * events for its activity feed; everything else is read from the network when it is shown.
+ * events for its activity feed (the last {@value #FEED_SIZE} events, newest first); everything else is
+ * read from the network when it is shown. When an {@link Operator} is viewing, only stations in their
+ * zones are listed. Not thread-safe: in the app it is notified and shown under the system lock.
  */
 public class OperatorDashboard implements FleetEventListener {
     private static final int FEED_SIZE = 8;
@@ -64,20 +72,26 @@ public class OperatorDashboard implements FleetEventListener {
         }
     }
 
+    /** Package-private: only {@link Operator}'s constructor sets the viewer. */
     void setViewer(Operator viewer) {
         this.viewer = viewer;
     }
 
+    /** Snapshot of the activity feed, newest first. */
     public List<FleetEvent> getRecentEvents() {
         return List.copyOf(feed);
     }
 
+    /** Prints stations, vehicles, active trips, open faults and the activity feed to the output stream. */
     public void showNetwork() {
         LocalDateTime now = clock.now();
         out.println(Ansi.paint("GoCycle control room", Ansi.BOLD)
                 + (viewer == null ? "" : " - " + viewer.getName()) + " - " + CLOCK.format(now));
 
         out.println(Ansi.paint("Stations", Ansi.BOLD));
+        // Vehicle -> where it is, keyed by reference as stations compare vehicles with ==. A vehicle found
+        // neither docked in a listed station nor on a trip is shown as "in transit", which includes
+        // vehicles docked in zones this operator does not oversee.
         Map<Vehicle, String> locations = new IdentityHashMap<>();
         for (Zone zone : zones) {
             if (viewer != null && !viewer.oversees(zone.getZoneId())) {
@@ -133,6 +147,7 @@ public class OperatorDashboard implements FleetEventListener {
         }
     }
 
+    /** Flags stations the control room should rebalance: no free points, or nothing ready to rent. */
     private static String stationAlert(int free, int ready) {
         if (free == 0) {
             return Ansi.paint("FULL - move vehicles out", Ansi.RED);

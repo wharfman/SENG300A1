@@ -1,3 +1,8 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Tests for the trip lifecycle in TripService, run against TestNetwork.
+ */
 package gocycle;
 
 import gocycle.faults.FleetEvent;
@@ -21,6 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Covers starting a trip (deposit hold, zone payment rules, battery and one-active-trip checks), returning
+ * to a full station, and ending only once the lock sensor confirms. Fares assume the casual rider's rate
+ * (1.25 unlock + 0.35/min).
+ */
 class TripServiceTest {
     private final TestNetwork net = new TestNetwork();
     private final CreditCardPayment card = new CreditCardPayment("4111 1111 1111 1111");
@@ -84,6 +94,7 @@ class TripServiceTest {
         assertEquals("error.not.locked", e.getMessageKey());
         assertTrue(trip.isActive());
 
+        // The failed attempt costs the rider time: 10 minutes riding + 2 retrying = 12 billed.
         net.advanceMinutes(2);
         net.lockWorks = true;
         assertTrue(point.dock(bike));
@@ -101,6 +112,7 @@ class TripServiceTest {
 
     @Test
     void fullStationRedirectsToNearestFreeStationAndKeepsCharging() {
+        // Fills B's only point.
         net.park(net.b, VehicleType.PEDAL_BIKE, "PB-B", 0);
         Vehicle bike = net.park(net.a, VehicleType.PEDAL_BIKE, "PB-1", 0);
         Trip trip = net.trips.startTrip(net.rider, net.a, bike, card);
@@ -112,6 +124,7 @@ class TripServiceTest {
         assertEquals(Trip.Status.ACTIVE, trip.getStatus());
         assertEquals(1, net.eventsOf(FleetEvent.Kind.TRIP_REDIRECTED).size());
 
+        // A redirect leaves the trip ACTIVE, so the rider must request a return at C before docking there.
         net.advanceMinutes(3);
         assertSame(net.c, net.trips.requestReturn(trip, net.c));
         DockingPoint point = net.c.getFreePoints().get(0);
@@ -124,6 +137,7 @@ class TripServiceTest {
     void longTripPaysTheSurcharge() {
         Vehicle bike = net.park(net.a, VehicleType.PEDAL_BIKE, "PB-1", 0);
         Trip trip = net.trips.startTrip(net.rider, net.a, bike, card);
+        // Past the 120-minute surcharge threshold.
         net.advanceMinutes(130);
         net.trips.requestReturn(trip, net.a);
         DockingPoint point = net.a.getFreePoints().get(0);

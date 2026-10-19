@@ -1,10 +1,20 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Event object of the fleet observer design, published by the trip, fault and control-room
+ * services and consumed by the maintenance crew, operator dashboard and rider app.
+ */
 package gocycle.faults;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
-/** Message sent to subscribers when something changes in the fleet. */
+/**
+ * Immutable message sent to subscribers when something changes in the fleet. The {@code message} is a
+ * ready-to-display English line for the operator's activity feed; only {@code FAULT_REPORTED} events
+ * carry a {@link FaultReport}.
+ */
 public class FleetEvent {
     public enum Kind {
         TRIP_STARTED,
@@ -50,6 +60,7 @@ public class FleetEvent {
         return occurredAt;
     }
 
+    /** Present only for {@code FAULT_REPORTED} events. */
     public Optional<FaultReport> getFaultReport() {
         return Optional.ofNullable(faultReport);
     }

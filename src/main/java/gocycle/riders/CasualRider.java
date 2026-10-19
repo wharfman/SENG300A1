@@ -1,3 +1,8 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * One of the three rider kinds; registered by GoCycleSystem and priced through CasualPricing.
+ */
 package gocycle.riders;
 
 import gocycle.pricing.CasualPricing;

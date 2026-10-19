@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * A physical station in the network. GoCycleSystem seeds them, TripService starts and ends trips at them,
+ * StationLocator ranks them by distance, and FleetSimulator and ControlRoomService move vehicles between them.
+ */
 package gocycle.stations;
 
 import gocycle.fleet.Vehicle;
@@ -9,8 +15,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-/** A station made of docking points plus a kiosk. */
+/**
+ * A station made of docking points plus a kiosk. The set of points is fixed at construction; which vehicles
+ * sit in them changes over time. The zone is set later, when {@link Zone#addStation} is called, and is null
+ * until then. Not thread-safe: callers go through {@code GoCycleSystem.atomically}.
+ */
 public class DockingStation {
+    // With the default 10% lock failure rate, ten tries all failing is about a one-in-ten-billion event.
     private static final int STAFF_DOCK_ATTEMPTS = 10;
 
     private final String stationId;
@@ -21,6 +32,14 @@ public class DockingStation {
     private final StationKiosk kiosk;
     private Zone zone;
 
+    /**
+     * Creates {@code pointCount} empty points numbered from 1, all sharing {@code lockSensor}, and labels the
+     * kiosk with the station name.
+     *
+     * @param latitude  degrees, used by {@link StationLocator#distanceKm}
+     * @param longitude degrees
+     * @throws IllegalArgumentException if {@code pointCount} is less than 1
+     */
     public DockingStation(String stationId, String name, double latitude, double longitude,
                           int pointCount, StationKiosk kiosk, BooleanSupplier lockSensor) {
         if (pointCount < 1) {
@@ -37,6 +56,7 @@ public class DockingStation {
         kiosk.attachTo(name);
     }
 
+    // Package-private so only Zone.addStation sets it, keeping both sides of the association in step.
     void assignZone(Zone zone) {
         this.zone = zone;
         kiosk.applyBranding(zone.getBranding());
@@ -54,15 +74,24 @@ public class DockingStation {
         return points.stream().filter(p -> !p.isFree()).map(DockingPoint::getVehicle).toList();
     }
 
+    /** Docked vehicles that pass {@link Vehicle#isRentable()} right now (status, and battery for electrics). */
     public List<Vehicle> getRentableVehicles() {
         return getDockedVehicles().stream().filter(Vehicle::isRentable).toList();
     }
 
+    /** Empty when the vehicle is not docked at this station. Matches by identity, not {@code equals}. */
     public Optional<DockingPoint> findPointHolding(Vehicle vehicle) {
         return points.stream().filter(p -> p.getVehicle() == vehicle).findFirst();
     }
 
-    /** Used by staff (seeding, rebalancing): they re-seat the vehicle until the latch confirms. */
+    /**
+     * Used by staff (seeding, rebalancing): they re-seat the vehicle until the latch confirms. Unlike a
+     * rider's {@link DockingPoint#dock}, it retries the first free point up to {@value #STAFF_DOCK_ATTEMPTS}
+     * times rather than reporting a single failed attempt.
+     *
+     * @return the point the vehicle is now locked into
+     * @throws IllegalStateException if the station has no free point, or the latch never catches
+     */
     public DockingPoint dockAnywhere(Vehicle vehicle) {
         DockingPoint point = getFreePoints().stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException(name + " has no free point"));

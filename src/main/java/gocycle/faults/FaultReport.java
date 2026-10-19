@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Fault-handling record created by FaultService and tracked by the
+ * maintenance crew and the operator dashboard until the repair is done.
+ */
 package gocycle.faults;
 
 import gocycle.fleet.Vehicle;
@@ -7,7 +13,11 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
-/** What is wrong, with which vehicle, and who reported it. */
+/**
+ * What is wrong, with which vehicle, and who reported it. Everything but the resolution time is fixed
+ * at creation; a report is open until {@link #resolve} is called, which only the maintenance crew does.
+ * Reports are compared by identity: the crew uses them as map keys.
+ */
 public class FaultReport {
     private final String reportId;
     private final FaultType type;
@@ -28,6 +38,7 @@ public class FaultReport {
         this.reportedAt = Objects.requireNonNull(reportedAt);
     }
 
+    /** Marks the repair as done at simulated time {@code at}. */
     public void resolve(LocalDateTime at) {
         resolvedAt = at;
     }
@@ -48,6 +59,7 @@ public class FaultReport {
         return vehicle;
     }
 
+    /** Empty when the vehicle reported the fault itself. */
     public Optional<Rider> getReportedBy() {
         return Optional.ofNullable(reportedBy);
     }
@@ -60,6 +72,7 @@ public class FaultReport {
         return reportedAt;
     }
 
+    /** Null while the report is still open. */
     public LocalDateTime getResolvedAt() {
         return resolvedAt;
     }

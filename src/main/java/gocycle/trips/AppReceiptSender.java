@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Trip side of receipt delivery: one of the {@link ReceiptSender} channels that {@code GoCycleSystem}
+ * hands to {@code TripService}, writing into the inbox that the rider app's menu shows.
+ */
 package gocycle.trips;
 
 import gocycle.riders.ReceiptDelivery;
