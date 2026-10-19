@@ -12,13 +12,23 @@ import gocycle.fleet.VehicleType;
 import gocycle.payments.CreditCardPayment;
 import gocycle.payments.PhoneWalletPayment;
 import gocycle.pricing.LongTripSurcharge;
+import gocycle.riders.ReceiptDelivery;
+import gocycle.riders.Rider;
 import gocycle.stations.DockingPoint;
 import gocycle.stations.DockingStation;
+import gocycle.stations.StationLocator;
+import gocycle.trips.AppReceiptSender;
 import gocycle.trips.Receipt;
+import gocycle.trips.ReceiptSender;
 import gocycle.trips.Trip;
 import gocycle.trips.TripException;
 import gocycle.trips.TripService;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -108,6 +118,40 @@ class TripServiceTest {
         assertTrue(trip.getDeposit().isReleased());
         assertEquals(VehicleStatus.AVAILABLE, bike.getStatus());
         assertSame(receipt, net.rider.getAppInbox().get(0));
+    }
+
+    @Test
+    void failedEmailReceiptStillEndsTheTripAndDeliversTheOtherCopies() {
+        ReceiptSender brokenEmail = new ReceiptSender() {
+            @Override
+            public void send(Receipt receipt, Rider to) {
+                throw new UncheckedIOException(new IOException("outbox is read-only"));
+            }
+
+            @Override
+            public ReceiptDelivery channel() {
+                return ReceiptDelivery.EMAIL;
+            }
+        };
+        TripService trips = new TripService(net.clock, new StationLocator(List.of(net.a, net.b, net.c)),
+                List.of(brokenEmail, new AppReceiptSender()), net.publisher);
+        net.rider.setReceiptDelivery(ReceiptDelivery.BOTH);
+        Vehicle bike = net.park(net.a, VehicleType.PEDAL_BIKE, "PB-1", 0);
+        Trip trip = trips.startTrip(net.rider, net.a, bike, card);
+        net.advanceMinutes(10);
+        trips.requestReturn(trip, net.b);
+        DockingPoint point = net.b.getFreePoints().get(0);
+        point.dock(bike);
+
+        Receipt receipt = trips.confirmDocked(trip, point);
+
+        assertEquals(Trip.Status.COMPLETED, trip.getStatus());
+        assertEquals(receipt.getAmount(), card.getTotalCharged(), 1e-9);
+        assertEquals(Set.of(ReceiptDelivery.EMAIL), receipt.getUndelivered());
+        // The email sender runs first, so this shows a failure doesn't stop the remaining channels.
+        assertSame(receipt, net.rider.getAppInbox().get(0));
+        assertEquals(1, net.eventsOf(FleetEvent.Kind.RECEIPT_FAILED).size());
+        assertEquals(1, net.eventsOf(FleetEvent.Kind.TRIP_ENDED).size());
     }
 
     @Test

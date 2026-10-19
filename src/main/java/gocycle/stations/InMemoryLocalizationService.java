@@ -215,6 +215,8 @@ public class InMemoryLocalizationService implements LocalizationService {
         fr("return.receipt.email", "envoyé par courriel à {0} (enregistré dans {1})");
         en("return.receipt.and", " and ");
         fr("return.receipt.and", " et ");
+        en("return.receipt.email.failed", "Your receipt could not be emailed to {0}; it is shown above.");
+        fr("return.receipt.email.failed", "Votre reçu n'a pas pu être envoyé par courriel à {0} ; il est affiché ci-dessus.");
 
         en("fault.riding", "The vehicle I'm riding ({0})");
         fr("fault.riding", "Le véhicule que j'utilise ({0})");
