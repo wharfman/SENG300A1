@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * One of the three rider kinds; registered by GoCycleSystem and priced through StudentPricing while
+ * verified.
+ */
 package gocycle.riders;
 
 import gocycle.pricing.CasualPricing;
@@ -13,12 +19,14 @@ public class Student extends Rider {
     private final String studentNumber;
     private final LocalDate verifiedUntil;
 
+    /** @param verifiedUntil last day the student rate applies */
     public Student(String riderId, String name, String email, String studentNumber, LocalDate verifiedUntil) {
         super(riderId, name, email);
         this.studentNumber = Objects.requireNonNull(studentNumber);
         this.verifiedUntil = Objects.requireNonNull(verifiedUntil);
     }
 
+    /** Verified up to and including {@code verifiedUntil}, judged by the real date rather than the simulation clock. */
     public boolean isVerified() {
         return !LocalDate.now().isAfter(verifiedUntil);
     }

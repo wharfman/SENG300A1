@@ -1,9 +1,20 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Root of the fleet model. TripService rents and returns vehicles, FaultService and the control room
+ * change their status, and FleetSimulator advances them minute by minute.
+ */
 package gocycle.fleet;
 
 import java.util.Objects;
 import java.util.Optional;
 
-/** State shared by every vehicle: its id, its status and whether it can be rented. */
+/**
+ * State shared by every vehicle: its id, its status and whether it can be rented.
+ *
+ * <p>{@link #checkRentable()} is the single rentability rule; subclasses extend it rather than adding
+ * checks elsewhere. Not thread-safe: callers go through {@code GoCycleSystem.atomically(...)}.
+ */
 public abstract class Vehicle {
     private final String vehicleId;
     private VehicleStatus status = VehicleStatus.AVAILABLE;
@@ -27,6 +38,12 @@ public abstract class Vehicle {
         return checkRentable().isEmpty();
     }
 
+    /**
+     * Marks the vehicle as out on a trip.
+     *
+     * @throws IllegalStateException if {@link #checkRentable()} refuses it; callers check first so they
+     *         can show the reason
+     */
     public void startUse() {
         if (!isRentable()) {
             throw new IllegalStateException(vehicleId + " cannot be rented");
@@ -34,6 +51,12 @@ public abstract class Vehicle {
         status = VehicleStatus.IN_USE;
     }
 
+    /**
+     * Ends a trip. The vehicle becomes available again, or goes out of service if a fault was reported
+     * while it was being ridden (see {@link #markOutOfService()}).
+     *
+     * @throws IllegalStateException if the vehicle is not in use
+     */
     public void endUse() {
         if (status != VehicleStatus.IN_USE) {
             throw new IllegalStateException(vehicleId + " is not in use");
@@ -54,6 +77,10 @@ public abstract class Vehicle {
         }
     }
 
+    /**
+     * Returns the vehicle to service after a repair or a control-room move. A vehicle on a trip keeps
+     * riding; only its pending out-of-service flag is cleared.
+     */
     public void markAvailable() {
         serviceDueOnReturn = false;
         if (status != VehicleStatus.IN_USE) {
@@ -61,6 +88,12 @@ public abstract class Vehicle {
         }
     }
 
+    /**
+     * Marks the vehicle as being moved between stations. The control room sets its final status
+     * ({@link #markAvailable()} or {@link #markOutOfService()}) once it is docked at the destination.
+     *
+     * @throws IllegalStateException if the vehicle is out on a trip
+     */
     public void markInTransit() {
         if (status == VehicleStatus.IN_USE) {
             throw new IllegalStateException(vehicleId + " is out on a trip");
@@ -68,11 +101,17 @@ public abstract class Vehicle {
         status = VehicleStatus.IN_TRANSIT;
     }
 
-    /** Called for each simulated minute the vehicle spends out on a trip. */
+    /**
+     * Advances the vehicle by {@code minutes} simulated minutes out on a trip. FleetSimulator calls it
+     * once per simulated minute. Does nothing for vehicles without a battery.
+     */
     public void ride(int minutes) {
     }
 
-    /** Called for each simulated minute the vehicle spends in a docking point. */
+    /**
+     * Advances the vehicle by {@code minutes} simulated minutes in a docking point, whatever its status.
+     * FleetSimulator calls it once per simulated minute. Does nothing for vehicles without a battery.
+     */
     public void rest(int minutes) {
     }
 

@@ -1,5 +1,14 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Fault categories offered to riders in the app and raised by electric vehicles themselves.
+ */
 package gocycle.faults;
 
+/**
+ * Kind of fault, with the label shown to riders and operators. Only types that require a repair take
+ * the vehicle out of service and become maintenance-crew jobs.
+ */
 public enum FaultType {
     FLAT_TIRE("Flat tire", true),
     BROKEN_BRAKES("Broken brakes", true),

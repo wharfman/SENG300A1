@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * One of the concrete payment kinds in the payments package; riders choose it in the rider app when
+ * starting a trip, and zones may accept or refuse it.
+ */
 package gocycle.payments;
 
 /** Credit card payments. Only the masked number is kept. */

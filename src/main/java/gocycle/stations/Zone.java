@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Groups stations under one set of business rules. GoCycleSystem builds zones from config/zones.properties,
+ * TripService checks the payment rule when a trip starts, and the operator dashboard reports per zone.
+ */
 package gocycle.stations;
 
 import gocycle.payments.PaymentMethod;
@@ -11,7 +17,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** A neighbourhood with its own allowed payment methods and branding. */
+/**
+ * A neighbourhood with its own allowed payment methods and branding. The allowed payment types are fixed at
+ * construction and never empty; stations are added during seeding.
+ */
 public class Zone {
     private final String zoneId;
     private final String name;
@@ -19,6 +28,10 @@ public class Zone {
     private final ZoneBranding branding;
     private final List<DockingStation> stations = new ArrayList<>();
 
+    /**
+     * @param allowedPayments copied, so later changes to the caller's set have no effect
+     * @throws IllegalArgumentException if {@code allowedPayments} is empty
+     */
     public Zone(String zoneId, String name, Set<PaymentType> allowedPayments, ZoneBranding branding) {
         if (allowedPayments.isEmpty()) {
             throw new IllegalArgumentException("Zone " + zoneId + " must allow at least one payment method");
@@ -29,15 +42,18 @@ public class Zone {
         this.branding = Objects.requireNonNull(branding);
     }
 
+    /** Decided by the method's {@link PaymentType} alone, not by the specific card or wallet. */
     public boolean allows(PaymentMethod method) {
         return allowedPayments.contains(method.getType());
     }
 
+    /** Also sets the station's zone and applies this zone's branding to its kiosk. */
     public void addStation(DockingStation station) {
         stations.add(station);
         station.assignZone(this);
     }
 
+    /** Comma-separated payment labels for display, e.g. in the {@code error.payment.zone} kiosk message. */
     public String describeAllowedPayments() {
         return allowedPayments.stream().map(PaymentType::getLabel).collect(Collectors.joining(", "));
     }

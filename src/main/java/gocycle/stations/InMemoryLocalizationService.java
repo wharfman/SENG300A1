@@ -1,3 +1,10 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * The message table behind every kiosk; GoCycleSystem creates one instance and shares it across all
+ * stations. Any new message key used by TripService, RiderApp or a refusal must be added here in all three
+ * languages.
+ */
 package gocycle.stations;
 
 import java.util.HashMap;
@@ -5,7 +12,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** Kiosk text in English, French and Spanish. Unknown languages fall back to English. */
+/**
+ * Kiosk text in English, French and Spanish, built once in the constructor and read-only afterwards.
+ * Lookups match on language only (a {@code fr_CA} rider gets the French text). Unknown languages, or keys
+ * missing in the rider's language, fall back to English; a key missing everywhere is returned as-is so the
+ * gap shows on screen instead of failing.
+ */
 public class InMemoryLocalizationService implements LocalizationService {
     private static final Locale FRENCH = Locale.FRENCH;
     private static final Locale SPANISH = Locale.of("es");
@@ -88,6 +100,7 @@ public class InMemoryLocalizationService implements LocalizationService {
         return List.of(Locale.ENGLISH, FRENCH, SPANISH);
     }
 
+    /** Null when the language or the key is missing. */
     private String lookup(String language, String key) {
         return byLanguage.getOrDefault(language, Map.of()).get(key);
     }

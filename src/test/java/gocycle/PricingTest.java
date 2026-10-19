@@ -1,3 +1,8 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Unit tests for the pricing package and the per-rider-kind pricing chosen in the riders package.
+ */
 package gocycle;
 
 import gocycle.pricing.CasualPricing;
@@ -15,6 +20,11 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Covers the fare formula for each rider kind, the casual-rate fallback for lapsed members and the
+ * long-trip surcharge. Expected fares are written out as unlock fee + minutes x rate so a changed rate
+ * shows up as a failure here.
+ */
 class PricingTest {
     @Test
     void tripCostsUnlockFeePlusPerMinuteRate() {
@@ -32,12 +42,15 @@ class PricingTest {
         assertTrue(student < casual);
     }
 
+    // Membership status is checked against the real date (LocalDate.now()), not a simulation clock,
+    // so the renewal date is set relative to today.
     @Test
     void lapsedMemberPaysCasualRate() {
         Member lapsed = new Member("R-2", "M", "m@x", 15, LocalDate.now().minusDays(1));
         assertEquals(new CasualPricing().calculate(30), lapsed.getPricingStrategy().calculate(30), 1e-9);
     }
 
+    // 120 minutes is exactly the threshold and is not surcharged; 121 is the first minute that is.
     @Test
     void surchargeAppliesOnlyAfterTwoHours() {
         PricingStrategy pricing = new LongTripSurcharge(new CasualPricing());

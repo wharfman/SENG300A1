@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Application layer: the keyboard side of the terminal program. Only RiderApp uses it; kiosk and dashboard
+ * output goes straight to their own PrintStream.
+ */
 package gocycle.app;
 
 import gocycle.common.Ansi;
@@ -10,7 +16,11 @@ import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.util.List;
 
-/** Numbered-menu input and output for the rider terminal. */
+/**
+ * Numbered-menu input and output for the rider terminal. Every read blocks until a line arrives, re-prompts
+ * on invalid input, and throws {@link InputClosedException} at end of input. Not thread-safe; only the menu
+ * thread uses it, and never while holding the {@link GoCycleSystem#atomically} lock.
+ */
 final class Console {
     /** Thrown when standard input closes, e.g. Ctrl+Z / Ctrl+D. */
     static final class InputClosedException extends RuntimeException {
@@ -28,6 +38,12 @@ final class Console {
         out.println(text);
     }
 
+    /**
+     * Prints {@code prompt} without a newline and returns the next line with surrounding whitespace removed.
+     *
+     * @throws InputClosedException at end of input
+     * @throws UncheckedIOException if reading fails
+     */
     String readLine(String prompt) {
         out.print(prompt);
         out.flush();
@@ -51,11 +67,13 @@ final class Console {
         }
     }
 
+    /** Returns {@code fallback} when the rider just presses Enter. */
     String readOrDefault(String prompt, String fallback) {
         String line = readLine(prompt);
         return line.isEmpty() ? fallback : line;
     }
 
+    /** Re-prompts until the rider enters a whole number from {@code min} to {@code max} inclusive. */
     int readInt(String prompt, int min, int max) {
         while (true) {
             String line = readLine(prompt);
@@ -71,6 +89,7 @@ final class Console {
         }
     }
 
+    /** Appends " (y/n): " to the prompt and re-prompts until the answer is y, yes, n or no (any case). */
     boolean confirm(String prompt) {
         while (true) {
             String line = readLine(prompt + " (y/n): ").toLowerCase();

@@ -1,3 +1,9 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Application layer: the program's entry point and 1-9 menu. It drives the domain only through GoCycleSystem
+ * and reads the keyboard through Console; station kiosks print their own localized messages.
+ */
 package gocycle.app;
 
 import gocycle.common.Ansi;
@@ -36,8 +42,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Rider terminal: the phone app and the station kiosks in one console. Every action goes through
  * {@link GoCycleSystem#atomically} so it never interleaves with the simulated clock.
+ *
+ * <p>One rider is signed in at a time. Keyboard input is always read outside the lock, so the clock keeps
+ * running while the menu waits; each step therefore re-reads state, and the domain services re-check
+ * their rules, because the network may have changed between prompts.
  */
 public final class RiderApp {
+    // Simulated time charged for riding on to a redirect station: 4 min/km is about 15 km/h.
     private static final double RIDE_MINUTES_PER_KM = 4.0;
     private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("EEE HH:mm");
     private static final List<String> MENU = List.of(
@@ -53,7 +64,9 @@ public final class RiderApp {
 
     private final GoCycleSystem system;
     private final Console console;
+    // Filled by noticeForCurrentRider, which can run on the clock thread; drained by the menu thread.
     private final Queue<String> notices = new ConcurrentLinkedQueue<>();
+    // Written only by the menu thread, but also read by noticeForCurrentRider on the clock thread.
     private volatile Rider rider;
 
     RiderApp(GoCycleSystem system, Console console) {
@@ -67,6 +80,7 @@ public final class RiderApp {
         new RiderApp(GoCycleSystem.create(), new Console(System.in, System.out)).run();
     }
 
+    /** Starts the clock and loops over the menu until the rider picks Exit or input closes. */
     void run() {
         system.startClock();
         Runtime.getRuntime().addShutdownHook(new Thread(system::shutdown));
@@ -193,6 +207,7 @@ public final class RiderApp {
             return;
         }
         Vehicle vehicle = vehicles.get(pick);
+        // Only a payment type the zone refuses lets the rider try again; any other refusal ends the attempt.
         while (true) {
             PaymentMethod method = choosePayment(station.getZone());
             if (method == null) {
@@ -200,6 +215,7 @@ public final class RiderApp {
             }
             try {
                 system.atomically(() -> {
+                    // Look up the point first: startTrip releases it, after which the vehicle is in no point.
                     Optional<DockingPoint> point = station.findPointHolding(vehicle);
                     Trip trip = system.getTripService().startTrip(rider, station, vehicle, method);
                     kiosk.announce("kiosk.unlocked", vehicle.getVehicleId(),
@@ -216,6 +232,10 @@ public final class RiderApp {
         }
     }
 
+    /**
+     * Lists every payment type, marking those the zone refuses rather than hiding them, so that picking one
+     * shows the kiosk's refusal. Returns null if the rider goes back.
+     */
     private PaymentMethod choosePayment(Zone zone) {
         List<PaymentType> types = List.of(PaymentType.values());
         List<String> labels = types.stream()
@@ -248,6 +268,7 @@ public final class RiderApp {
 
     // ---------------------------------------------------------------- 4. time
 
+    /** Advances the simulation by the chosen number of minutes at once, on top of the background clock. */
     private void letTimePass() {
         console.say(Ansi.paint("Time also passes on its own: every real second is "
                 + Integer.getInteger("gocycle.simSecondsPerTick", 15) + " network seconds.", Ansi.DIM));
@@ -258,6 +279,10 @@ public final class RiderApp {
 
     // ---------------------------------------------------------------- 5. return
 
+    /**
+     * Asks for a return station and follows redirects (the requested station may be full) until the rider
+     * reaches one with a free point, then docks. Declining a redirect leaves the trip running.
+     */
     private void returnVehicle() {
         Optional<Trip> active = system.atomically(() -> rider.getActiveTrip());
         if (active.isEmpty()) {
@@ -271,6 +296,7 @@ public final class RiderApp {
         }
         DockingStation station = chosen;
         while (true) {
+            // Effectively-final copy for the lambdas below.
             DockingStation at = station;
             DockingStation target;
             try {
@@ -312,6 +338,7 @@ public final class RiderApp {
             DockingPoint point = free.get();
             system.atomically(() -> kiosk.announce("kiosk.dock.instruction", trip.getVehicle().getVehicleId(), point.getPointNumber()));
             console.readLine("Press Enter to push the vehicle into point " + point.getPointNumber() + "...");
+            // dock also fails if the point was taken while the rider was at the prompt; either way try another.
             boolean locked = system.atomically(() -> point.dock(trip.getVehicle()));
             if (!locked) {
                 system.atomically(() -> kiosk.announce("error.lock.failed", point.getPointNumber()));
@@ -334,6 +361,7 @@ public final class RiderApp {
         }
     }
 
+    /** Tells the rider where the receipt went, according to their delivery setting. */
     private String deliveryNote(Receipt receipt) {
         ReceiptDelivery delivery = rider.getReceiptDelivery();
         List<String> notes = new ArrayList<>();
@@ -348,6 +376,10 @@ public final class RiderApp {
 
     // ---------------------------------------------------------------- 6. faults
 
+    /**
+     * Files a fault for the vehicle being ridden or for one docked at a station. Only a report made at a
+     * station is shown on that station's kiosk.
+     */
     private void reportProblem() {
         Optional<Trip> active = system.atomically(() -> rider.getActiveTrip());
         Vehicle vehicle;
@@ -385,6 +417,7 @@ public final class RiderApp {
         }
         FaultType type = types.get(t);
         String note = console.readLine("Anything else we should know? (optional): ");
+        // Effectively-final copy of kiosk for the lambda below.
         StationKiosk screen = kiosk;
         FaultReport report = system.atomically(() -> {
             FaultReport r = system.getFaultService().reportByRider(rider, vehicle, type, note);
@@ -467,6 +500,7 @@ public final class RiderApp {
 
     // ---------------------------------------------------------------- shared
 
+    /** Header shown before each menu: clock, signed-in rider, fare and active trip. Call inside the lock. */
     private String statusPanel() {
         StringBuilder b = new StringBuilder(System.lineSeparator());
         b.append(Ansi.paint(" GoCycle ", Ansi.BOLD, Ansi.background("#1B5E20"), Ansi.foreground("#FFFFFF")))
@@ -492,7 +526,9 @@ public final class RiderApp {
         return b.toString();
     }
 
+    /** Returns the chosen station, or null if the rider goes back. */
     private DockingStation chooseStation(String title) {
+        // Read outside the lock: the station list never changes after the system is built.
         List<DockingStation> stations = system.getStations();
         List<String> labels = system.atomically(() -> stations.stream()
                 .map(s -> s.getName() + " (" + s.getZone().getName() + ") - " + s.getRentableVehicles().size()
@@ -502,6 +538,7 @@ public final class RiderApp {
         return pick < 0 ? null : stations.get(pick);
     }
 
+    /** One aligned line per vehicle: id, type, battery and why it can or cannot be rented. Call inside the lock. */
     private String vehicleLabel(Vehicle v) {
         String battery = v instanceof ElectricVehicle ev ? "battery " + ev.getBattery().getChargePercent() + "%" : "";
         String state;
@@ -515,8 +552,12 @@ public final class RiderApp {
         return String.format("%-7s %-11s %-12s ", v.getVehicleId(), v.getType().getLabel(), battery) + state;
     }
 
-    /** Tells the rider when the vehicle they are on reports a problem by itself, e.g. low battery. */
+    /**
+     * Fleet-event listener: queues a notice when the vehicle the signed-in rider is on reports a problem by
+     * itself, e.g. low battery. Runs on whichever thread published the event, inside the lock.
+     */
     private void noticeForCurrentRider(FleetEvent event) {
+        // Read the volatile field once so the whole check uses the same rider.
         Rider current = rider;
         event.getFaultReport()
                 .filter(report -> report.getReportedBy().isEmpty())

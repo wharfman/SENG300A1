@@ -1,3 +1,8 @@
+/*
+ * GoCycle - SENG 300 Assignment 1
+ *
+ * Tests for fault reporting, maintenance repairs and battery behaviour, run against TestNetwork.
+ */
 package gocycle;
 
 import gocycle.faults.FaultReport;
@@ -17,6 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Covers fault reports from riders and from electric vehicles, the out-of-service rules (including
+ * faults reported mid-trip), maintenance-crew repairs and the 20% battery rental threshold.
+ */
 class FaultHandlingTest {
     private final TestNetwork net = new TestNetwork();
 
@@ -58,6 +67,8 @@ class FaultHandlingTest {
         assertEquals(VehicleStatus.OUT_OF_SERVICE, bike.getStatus());
     }
 
+    // An e-bike drains 1% per minute: 21% -> 20% stays rentable, 20% -> 19% triggers the report, and the
+    // third minute (18%) must not report again.
     @Test
     void electricVehicleReportsLowBatteryOnItsOwnOnce() {
         ElectricVehicle bike = (ElectricVehicle) net.park(net.a, VehicleType.E_BIKE, "EB-1", 21);
@@ -80,6 +91,7 @@ class FaultHandlingTest {
         ElectricVehicle scooter = (ElectricVehicle) net.park(net.a, VehicleType.E_SCOOTER, "ES-1", 19);
         assertFalse(scooter.isRentable());
 
+        // Exactly long enough to gain 1%, taking it from 19% to the 20% threshold.
         scooter.rest(ElectricVehicle.MINUTES_PER_PERCENT_CHARGED);
 
         assertEquals(20, scooter.getBattery().getChargePercent());
