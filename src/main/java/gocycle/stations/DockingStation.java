@@ -93,14 +93,25 @@ public class DockingStation {
      * @throws IllegalStateException if the station has no free point, or the latch never catches
      */
     public DockingPoint dockAnywhere(Vehicle vehicle) {
+        return tryDockAnywhere(vehicle)
+                .orElseThrow(() -> new IllegalStateException("No point at " + name + " will lock"));
+    }
+
+    /**
+     * Same as {@link #dockAnywhere}, but a latch that never catches is an expected outcome rather than an
+     * error: the result is empty and the station is unchanged.
+     *
+     * @throws IllegalStateException if the station has no free point
+     */
+    public Optional<DockingPoint> tryDockAnywhere(Vehicle vehicle) {
         DockingPoint point = getFreePoints().stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException(name + " has no free point"));
         for (int attempt = 0; attempt < STAFF_DOCK_ATTEMPTS; attempt++) {
             if (point.dock(vehicle)) {
-                return point;
+                return Optional.of(point);
             }
         }
-        throw new IllegalStateException("Point " + point.getPointNumber() + " at " + name + " will not lock");
+        return Optional.empty();
     }
 
     public String getStationId() {
