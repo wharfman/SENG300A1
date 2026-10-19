@@ -270,7 +270,7 @@ public final class RiderApp {
 
     /** Advances the simulation by the chosen number of minutes at once, on top of the background clock. */
     private void letTimePass() {
-        console.say(Ansi.paint(t("time.background", Integer.getInteger("gocycle.simSecondsPerTick", 15)), Ansi.DIM));
+        console.say(Ansi.paint(t("time.background", GoCycleSystem.simSecondsPerTick()), Ansi.DIM));
         int minutes = console.readInt(t("time.ask"), 1, 240);
         system.atomically(() -> system.getSimulator().advance(Duration.ofMinutes(minutes)));
         console.say(t("time.passed", minutes));

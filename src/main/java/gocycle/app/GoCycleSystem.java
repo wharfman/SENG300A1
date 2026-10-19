@@ -151,6 +151,11 @@ public final class GoCycleSystem {
         return Path.of(System.getProperty("gocycle.dataDir", "data"));
     }
 
+    /** Simulated seconds the clock thread adds per real second, from {@code gocycle.simSecondsPerTick} (default 15). */
+    public static int simSecondsPerTick() {
+        return Integer.getInteger("gocycle.simSecondsPerTick", DEFAULT_SIM_SECONDS_PER_TICK);
+    }
+
     // ---------------------------------------------------------------- seeding
 
     /** Creates the two Calgary zones and their stations, each partly filled with vehicles. */
@@ -285,11 +290,11 @@ public final class GoCycleSystem {
     }
 
     /**
-     * Starts a daemon thread that advances simulated time by {@code gocycle.simSecondsPerTick} seconds
-     * (default 15) every real second, inside {@link #atomically}. Call at most once.
+     * Starts a daemon thread that advances simulated time by {@link #simSecondsPerTick()} seconds every real
+     * second, inside {@link #atomically}. Call at most once.
      */
     public void startClock() {
-        Duration perTick = Duration.ofSeconds(Integer.getInteger("gocycle.simSecondsPerTick", DEFAULT_SIM_SECONDS_PER_TICK));
+        Duration perTick = Duration.ofSeconds(simSecondsPerTick());
         ticker = Executors.newSingleThreadScheduledExecutor(task -> {
             Thread thread = new Thread(task, "gocycle-clock");
             thread.setDaemon(true);
