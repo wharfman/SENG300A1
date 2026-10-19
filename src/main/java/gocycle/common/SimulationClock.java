@@ -1,7 +1,7 @@
 /*
  * GoCycle - SENG 300 Assignment 1
  *
- * The single source of "now" for trips, faults, repairs and the dashboard. GoCycleSystem owns one instance
+ * The single source of "now" for trips, faults and repairs. GoCycleSystem owns one instance
  * and FleetSimulator is what moves it forward; tests advance it directly.
  */
 package gocycle.common;

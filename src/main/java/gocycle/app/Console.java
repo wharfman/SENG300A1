@@ -1,8 +1,8 @@
 /*
  * GoCycle - SENG 300 Assignment 1
  *
- * Application layer: the keyboard side of the terminal program. Only RiderApp uses it; kiosk and dashboard
- * output goes straight to their own PrintStream.
+ * Application layer: the keyboard side of the terminal program. Only RiderApp uses it; kiosk output goes
+ * straight to its own PrintStream.
  */
 package gocycle.app;
 

@@ -8,7 +8,6 @@ Gavin Kyle - 30196910
 You need a JDK 24+ and Maven.
 
 - **Windows:** double-click `start-gocycle.cmd`, or run `run-rider.cmd`.
-- **Any OS:** from the repo root, run `run-rider.sh`.
 
 ## Rider menu
 
@@ -19,7 +18,7 @@ You need a JDK 24+ and Maven.
 5. Return my vehicle (full stations redirect you to the nearest free point; the trip ends only once the lock is confirmed)
 6. Report a problem with a vehicle
 7. My trips and receipts
-8. Language, read-aloud and receipt settings
+8. Language and receipt settings
 9. Exit
 
 Seeded data: Eau Claire starts full (to try the redirect), ES-301 and EB-205 are below 20% battery, Kensington doesn't accept credit cards. Zone payments and branding are set in `config/zones.properties`.
@@ -27,7 +26,7 @@ Seeded data: Eau Claire starts full (to try the redirect), ES-301 and EB-205 are
 ## Notes
 
 -   Repairs: the maintenance crew fixes broken vehicles after 45 simulated minutes.
--   Rebalancing: every 30 minutes, one ready vehicle is moved automatically from a full station to an empty one. The operator has no controls, so this was the only way to show rebalancing.
+-   Rebalancing: every 30 minutes, one ready vehicle is moved automatically from a full station to an empty one.
 -   Rider terminal: Runs a simulated clock where each real second is 15 seconds of trip time, so batteries, costs and repairs keep moving on their own.
 -   Zone Payment: Credit cards refused in Kensington
 -   Charging: Electric vehicles recharge overtime

@@ -14,15 +14,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * of every fleet event, in subscription order and on the publishing thread.
  */
 public class FleetEventPublisher {
-    // Copy-on-write so a listener can subscribe or unsubscribe while an event is being delivered.
+    // Copy-on-write so a listener can subscribe while an event is being delivered.
     private final List<FleetEventListener> subscribers = new CopyOnWriteArrayList<>();
 
     public void subscribe(FleetEventListener listener) {
         subscribers.add(listener);
-    }
-
-    public void unsubscribe(FleetEventListener listener) {
-        subscribers.remove(listener);
     }
 
     public void publish(FleetEvent event) {

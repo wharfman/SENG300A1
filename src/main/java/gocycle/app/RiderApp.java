@@ -193,7 +193,6 @@ public final class RiderApp {
         }
         StationKiosk kiosk = station.getKiosk();
         List<Vehicle> vehicles = system.atomically(() -> {
-            kiosk.serve(rider);
             kiosk.announce("kiosk.welcome", station.getName());
             return station.getDockedVehicles();
         });
@@ -251,7 +250,7 @@ public final class RiderApp {
             case TRANSIT_CARD -> new TransitCardPayment(readCardNumber(t("pay.transit.number"), "6012 3456 7890"));
             case PHONE_WALLET -> {
                 console.say(t("pay.wallet.paired"));
-                yield new PhoneWalletPayment("wallet-" + rider.getRiderId());
+                yield new PhoneWalletPayment();
             }
         };
     }
@@ -299,10 +298,7 @@ public final class RiderApp {
             DockingStation at = station;
             DockingStation target;
             try {
-                target = system.atomically(() -> {
-                    at.getKiosk().serve(rider);
-                    return system.getTripService().requestReturn(trip, at);
-                });
+                target = system.atomically(() -> system.getTripService().requestReturn(trip, at));
             } catch (TripException e) {
                 system.atomically(() -> at.getKiosk().announce(e.getMessageKey(), e.getArgs()));
                 return;
@@ -427,7 +423,6 @@ public final class RiderApp {
         FaultReport report = system.atomically(() -> {
             FaultReport r = system.getFaultService().reportByRider(rider, vehicle, type, note);
             if (screen != null) {
-                screen.serve(rider);
                 screen.announce(type.requiresRepair() ? "kiosk.fault.thanks" : "kiosk.fault.noted",
                         vehicle.getVehicleId(), type);
             }
@@ -473,12 +468,11 @@ public final class RiderApp {
 
     // ---------------------------------------------------------------- 8. settings
 
-    /** The language here is the system-wide one; read-aloud and receipts belong to the signed-in rider. */
+    /** The language here is the system-wide one; the receipt setting belongs to the signed-in rider. */
     private void settings() {
         while (true) {
             List<String> options = system.atomically(() -> List.of(
                     t("settings.language", languageName(l10n.getLanguage())),
-                    t("settings.read.aloud", t(rider.isAudioAssist() ? "settings.on" : "settings.off")),
                     t("settings.receipts", rider.getReceiptDelivery())));
             int pick = console.choose(t("settings.title", rider.getName()), options);
             switch (pick) {
@@ -489,8 +483,7 @@ public final class RiderApp {
                         l10n.setLanguage(locales.get(l));
                     }
                 }
-                case 1 -> system.atomically(() -> rider.setAudioAssist(!rider.isAudioAssist()));
-                case 2 -> {
+                case 1 -> {
                     List<ReceiptDelivery> channels = List.of(ReceiptDelivery.values());
                     int c = console.choose(t("settings.choose.receipts"), channels.stream().map(l10n::render).toList());
                     if (c >= 0) {

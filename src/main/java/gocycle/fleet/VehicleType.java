@@ -6,21 +6,10 @@
 package gocycle.fleet;
 
 /**
- * The kinds of vehicle in the fleet. The label is the English one used in the control-room log; rider screens
- * translate the constant through {@code LocalizationService} (key {@code VehicleType.<CONSTANT>}).
+ * The kinds of vehicle in the fleet. Screens translate the constant through {@code LocalizationService} (key {@code VehicleType.<CONSTANT>}).
  */
 public enum VehicleType {
-    PEDAL_BIKE("Pedal bike"),
-    E_BIKE("E-bike"),
-    E_SCOOTER("E-scooter");
-
-    private final String label;
-
-    VehicleType(String label) {
-        this.label = label;
-    }
-
-    public String getLabel() {
-        return label;
-    }
+    PEDAL_BIKE,
+    E_BIKE,
+    E_SCOOTER
 }

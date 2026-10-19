@@ -21,7 +21,6 @@ import gocycle.stations.Zone;
 import java.io.UncheckedIOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -188,17 +187,8 @@ public class TripService {
         }
     }
 
-    public List<Trip> getTrips() {
-        return Collections.unmodifiableList(trips);
-    }
-
     /** Trips not yet completed, including those awaiting a dock. */
     public List<Trip> getActiveTrips() {
         return trips.stream().filter(Trip::isActive).toList();
-    }
-
-    /** Total charged for completed trips, in dollars rounded to the cent. */
-    public double getRevenue() {
-        return Money.round(trips.stream().filter(t -> !t.isActive()).mapToDouble(Trip::getCost).sum());
     }
 }

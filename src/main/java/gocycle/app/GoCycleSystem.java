@@ -2,14 +2,12 @@
  * GoCycle - SENG 300 Assignment 1
  *
  * Application layer: wires every domain package together for the terminal program. RiderApp owns one
- * instance and reaches all services, stations, vehicles and riders through it.
+ * instance and reaches all services, stations and riders through it.
  */
 package gocycle.app;
 
 import gocycle.common.SimulationClock;
 import gocycle.controlroom.ControlRoomService;
-import gocycle.controlroom.Operator;
-import gocycle.controlroom.OperatorDashboard;
 import gocycle.faults.FaultService;
 import gocycle.faults.FleetEventPublisher;
 import gocycle.faults.MaintenanceCrew;
@@ -22,7 +20,6 @@ import gocycle.riders.Member;
 import gocycle.riders.ReceiptDelivery;
 import gocycle.riders.Rider;
 import gocycle.riders.Student;
-import gocycle.stations.ConsoleTextToSpeech;
 import gocycle.stations.DockingStation;
 import gocycle.stations.InMemoryLocalizationService;
 import gocycle.stations.LocalizationService;
@@ -65,8 +62,8 @@ import java.util.stream.Collectors;
  *
  * <p>The domain objects are not thread-safe, so the lists and services returned by the accessors are
  * live state and must only be read or changed inside {@link #atomically}. Fleet events are delivered
- * synchronously on the publishing thread, so subscribers (the maintenance crew, the operator dashboard
- * and the rider app) also run while that lock is held. The station list is fixed after construction.
+ * synchronously on the publishing thread, so subscribers (the maintenance crew and the rider app) also
+ * run while that lock is held. The station list is fixed after construction.
  */
 public final class GoCycleSystem {
     public static final double MEMBER_MONTHLY_FEE = 15.00;
@@ -82,11 +79,9 @@ public final class GoCycleSystem {
     private final MaintenanceCrew crew;
     private final List<Zone> zones = new ArrayList<>();
     private final List<DockingStation> stations = new ArrayList<>();
-    private final List<Vehicle> vehicles = new ArrayList<>();
     private final List<Rider> riders = new ArrayList<>();
     private final TripService tripService;
     private final FleetSimulator simulator;
-    private final Operator operator;
     private final Path outbox;
     private ScheduledExecutorService ticker;
     private int nextRiderNumber = 1;
@@ -98,7 +93,7 @@ public final class GoCycleSystem {
      *                        may be empty, in which case the built-in zone names, all payment types and the
      *                        default branding are used
      * @param dataDir         emailed receipts are written to its {@code outbox} subfolder
-     * @param kioskScreen     where every station kiosk and the operator dashboard print
+     * @param kioskScreen     where every station kiosk prints
      * @param random          drives the lock sensors and the simulator's random faults
      * @param lockFailureRate probability (0 to 1) that a docking point's latch fails to catch on one attempt
      * @throws IllegalArgumentException if a zone lists a payment type that is not a {@link PaymentType} name
@@ -110,7 +105,7 @@ public final class GoCycleSystem {
         publisher.subscribe(crew);
 
         // Each station gets its own kiosk, but they all print to the same screen.
-        Supplier<StationKiosk> kiosks = () -> new StationKiosk(localization, new ConsoleTextToSpeech(kioskScreen, localization), kioskScreen);
+        Supplier<StationKiosk> kiosks = () -> new StationKiosk(localization, kioskScreen);
         seedNetwork(config, kiosks, () -> random.nextDouble() >= lockFailureRate);
         seedRiders();
 
@@ -119,11 +114,6 @@ public final class GoCycleSystem {
         tripService = new TripService(clock, new StationLocator(stations),
                 List.of(new AppReceiptSender(), new EmailReceiptSender(outbox, localization)), publisher);
         simulator = new FleetSimulator(clock, stations, tripService, crew, controlRoom, random);
-        OperatorDashboard dashboard = new OperatorDashboard(kioskScreen, clock, zones, vehicles, tripService,
-                faultService, crew);
-        publisher.subscribe(dashboard);
-        operator = new Operator("OP-1", "Jordan Lee",
-                zones.stream().map(Zone::getZoneId).collect(Collectors.toSet()), dashboard);
     }
 
     /**
@@ -225,18 +215,16 @@ public final class GoCycleSystem {
         return station;
     }
 
-    /** Docks a newly built vehicle at seeding time and registers it with the fleet. */
+    /** Docks a newly built vehicle at seeding time. */
     private void park(DockingStation station, Vehicle vehicle) {
         station.dockAnywhere(vehicle);
-        vehicles.add(vehicle);
     }
 
-    /** One demo rider of each kind, with settings that show off read-aloud and email receipts. */
+    /** One demo rider of each kind, with settings that show off email receipts. */
     private void seedRiders() {
         signUpCasual("Alex Chen", "alex.chen@example.com");
         signUpMember("Sam Okafor", "sam.okafor@example.com");
         Rider priya = signUpStudent("Priya Natarajan", "priya.natarajan@ucalgary.ca", "30123456");
-        priya.setAudioAssist(true);
         priya.setReceiptDelivery(ReceiptDelivery.BOTH);
     }
 
@@ -352,16 +340,8 @@ public final class GoCycleSystem {
         return Collections.unmodifiableList(stations);
     }
 
-    public List<Vehicle> getVehicles() {
-        return Collections.unmodifiableList(vehicles);
-    }
-
     public List<Rider> getRiders() {
         return Collections.unmodifiableList(riders);
-    }
-
-    public Operator getOperator() {
-        return operator;
     }
 
     public Path getOutbox() {

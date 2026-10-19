@@ -2,7 +2,7 @@
  * GoCycle - SENG 300 Assignment 1
  *
  * Fault-handling record created by FaultService and tracked by the
- * maintenance crew and the operator dashboard until the repair is done.
+ * maintenance crew until the repair is done.
  */
 package gocycle.faults;
 

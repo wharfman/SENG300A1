@@ -1,8 +1,8 @@
 /*
  * GoCycle - SENG 300 Assignment 1
  *
- * Observer interface of the fleet event design, implemented by the maintenance crew and the
- * operator dashboard and used as a lambda by the rider app and tests.
+ * Observer interface of the fleet event design, implemented by the maintenance crew and used
+ * as a lambda by the rider app and tests.
  */
 package gocycle.faults;
 
