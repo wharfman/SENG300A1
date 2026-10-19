@@ -23,7 +23,9 @@ public class FleetEvent {
         FAULT_REPORTED,
         OUT_OF_SERVICE,
         BACK_IN_SERVICE,
-        REBALANCED
+        REBALANCED,
+        /** A copy of a receipt could not be delivered; the trip itself was completed and charged. */
+        RECEIPT_FAILED
     }
 
     private final Kind kind;

@@ -9,15 +9,20 @@ package gocycle.trips;
 import gocycle.common.Message;
 import gocycle.common.Money;
 import gocycle.fleet.VehicleType;
+import gocycle.riders.ReceiptDelivery;
 import gocycle.stations.LocalizationService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
- * Summary sent to the rider once a trip is paid for. An immutable snapshot: the values are copied from
- * the trip when the receipt is created, and translated only when shown, so an old receipt follows the
- * current language.
+ * Summary sent to the rider once a trip is paid for. The trip values are a snapshot copied when the
+ * receipt is created, and translated only when shown, so an old receipt follows the current language.
+ * The only state added later is which delivery channels failed, recorded by {@link TripService} before
+ * it hands the receipt back.
  */
 public class Receipt {
     private static final DateTimeFormatter ISSUED = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -33,6 +38,7 @@ public class Receipt {
     private final Message payment;
     private final double depositReleased;
     private final LocalDateTime issuedAt;
+    private final Set<ReceiptDelivery> undelivered = EnumSet.noneOf(ReceiptDelivery.class);
 
     /**
      * {@code trip} must be completed: it needs the end station, end time and final cost. A running trip
@@ -86,5 +92,14 @@ public class Receipt {
 
     public LocalDateTime getIssuedAt() {
         return issuedAt;
+    }
+
+    /** Channels the rider asked for that could not deliver this receipt; empty when every copy went out. */
+    public Set<ReceiptDelivery> getUndelivered() {
+        return Collections.unmodifiableSet(undelivered);
+    }
+
+    void markUndelivered(ReceiptDelivery channel) {
+        undelivered.add(channel);
     }
 }

@@ -352,7 +352,10 @@ public final class RiderApp {
                 });
                 console.say("");
                 console.say(receipt.toText(l10n));
-                console.say(Ansi.paint(deliveryNote(receipt), Ansi.DIM));
+                deliveryNote(receipt).ifPresent(note -> console.say(Ansi.paint(note, Ansi.DIM)));
+                if (receipt.getUndelivered().contains(ReceiptDelivery.EMAIL)) {
+                    console.say(Ansi.paint(t("return.receipt.email.failed", rider.getEmail()), Ansi.YELLOW));
+                }
             } catch (TripException e) {
                 system.atomically(() -> kiosk.announce(e.getMessageKey(), e.getArgs()));
             }
@@ -360,17 +363,20 @@ public final class RiderApp {
         }
     }
 
-    /** Tells the rider where the receipt went, according to their delivery setting. */
-    private String deliveryNote(Receipt receipt) {
+    /**
+     * Tells the rider where the receipt went, according to their delivery setting and leaving out channels
+     * that failed; empty when no copy was delivered.
+     */
+    private Optional<String> deliveryNote(Receipt receipt) {
         ReceiptDelivery delivery = rider.getReceiptDelivery();
         List<String> notes = new ArrayList<>();
-        if (delivery.includes(ReceiptDelivery.APP)) {
+        if (delivery.includes(ReceiptDelivery.APP) && !receipt.getUndelivered().contains(ReceiptDelivery.APP)) {
             notes.add(t("return.receipt.app"));
         }
-        if (delivery.includes(ReceiptDelivery.EMAIL)) {
+        if (delivery.includes(ReceiptDelivery.EMAIL) && !receipt.getUndelivered().contains(ReceiptDelivery.EMAIL)) {
             notes.add(t("return.receipt.email", rider.getEmail(), system.getOutbox().resolve(receipt.getTripId() + ".txt")));
         }
-        return t("return.receipt", String.join(t("return.receipt.and"), notes));
+        return notes.isEmpty() ? Optional.empty() : Optional.of(t("return.receipt", String.join(t("return.receipt.and"), notes)));
     }
 
     // ---------------------------------------------------------------- 6. faults

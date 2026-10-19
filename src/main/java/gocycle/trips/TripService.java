@@ -18,6 +18,7 @@ import gocycle.stations.DockingStation;
 import gocycle.stations.StationLocator;
 import gocycle.stations.Zone;
 
+import java.io.UncheckedIOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,15 +127,14 @@ public class TripService {
     /**
      * Ends the trip only if the vehicle is really locked at {@code point}; then charges and sends the receipt.
      * Completing the trip also releases the deposit and ends the vehicle's use (applying any fault reported
-     * during the ride), and a {@code TRIP_ENDED} event is published.
+     * during the ride), and a {@code TRIP_ENDED} event is published. A receipt channel that fails does not
+     * fail the call: see {@link Receipt#getUndelivered()}.
      *
      * @param point a point at the station accepted by {@link #requestReturn}, after the rider called
      *              {@code DockingPoint.dock} on it
      * @throws IllegalStateException if {@link #requestReturn} hasn't accepted a station for this trip
      * @throws TripException         if the vehicle isn't locked at {@code point} at that station, or the
      *                               charge is declined; the trip stays {@code AWAITING_DOCK} in both cases
-     * @throws java.io.UncheckedIOException if the email receipt can't be written; the trip has already
-     *                               been completed and charged by then and is not rolled back
      */
     public Receipt confirmDocked(Trip trip, DockingPoint point) {
         if (trip.getStatus() != Trip.Status.AWAITING_DOCK) {
@@ -154,14 +154,33 @@ public class TripService {
 
         Receipt receipt = new Receipt(trip, end);
         Rider rider = trip.getRider();
-        receiptSenders.stream()
-                .filter(sender -> rider.getReceiptDelivery().includes(sender.channel()))
-                .forEach(sender -> sender.send(receipt, rider));
+        for (ReceiptSender sender : receiptSenders) {
+            if (rider.getReceiptDelivery().includes(sender.channel())) {
+                deliver(sender, receipt, trip);
+            }
+        }
         publisher.publish(new FleetEvent(FleetEvent.Kind.TRIP_ENDED, trip.getVehicle().getVehicleId(),
                 rider.getName() + " docked " + trip.getVehicle() + " at " + trip.getEndStation() + ": "
                         + receipt.getMinutes() + " min, " + Money.format(cost),
                 end));
         return receipt;
+    }
+
+    /**
+     * Sends one copy of the receipt. The trip is already completed and charged, so a channel that can't
+     * deliver (e.g. the email outbox can't be written) must neither undo that nor stop the other channels:
+     * the failure is recorded on the receipt and reported to the control room instead.
+     */
+    private void deliver(ReceiptSender sender, Receipt receipt, Trip trip) {
+        try {
+            sender.send(receipt, trip.getRider());
+        } catch (UncheckedIOException e) {
+            receipt.markUndelivered(sender.channel());
+            publisher.publish(new FleetEvent(FleetEvent.Kind.RECEIPT_FAILED, trip.getVehicle().getVehicleId(),
+                    "Receipt " + receipt.getTripId() + " for " + trip.getRider().getName() + " not sent by "
+                            + sender.channel() + ": " + e.getMessage(),
+                    clock.now()));
+        }
     }
 
     public List<Trip> getTrips() {
