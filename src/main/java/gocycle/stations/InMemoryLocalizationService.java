@@ -79,8 +79,8 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("error.lock.failed", "Lock not detected at point {0}. Your trip is still running. Please push the vehicle in again.");
         fr("error.lock.failed", "Verrouillage non détecté au point {0}. Votre trajet continue. Veuillez pousser le véhicule de nouveau.");
 
-        en("error.payment.declined", "The payment was declined. Your trip is still running.");
-        fr("error.payment.declined", "Le paiement a été refusé. Votre trajet continue.");
+        en("error.payment.declined", "The payment was declined, so the vehicle has been unlocked again. Your trip is still running.");
+        fr("error.payment.declined", "Le paiement a été refusé : le véhicule a donc été déverrouillé. Votre trajet continue.");
 
         en("error.network.full", "No station has a free point right now. Your trip is still running; please wait here.");
         fr("error.network.full", "Aucune station n'a de point libre pour le moment. Votre trajet continue ; veuillez patienter ici.");

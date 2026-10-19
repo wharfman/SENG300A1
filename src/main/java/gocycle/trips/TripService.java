@@ -134,7 +134,9 @@ public class TripService {
      *              {@code DockingPoint.dock} on it
      * @throws IllegalStateException if {@link #requestReturn} hasn't accepted a station for this trip
      * @throws TripException         if the vehicle isn't locked at {@code point} at that station, or the
-     *                               charge is declined; the trip stays {@code AWAITING_DOCK} in both cases
+     *                               charge is declined; the trip stays {@code AWAITING_DOCK} in both cases.
+     *                               A declined charge also unlocks the vehicle from {@code point} again, so
+     *                               it is back with the rider like any running trip
      */
     public Receipt confirmDocked(Trip trip, DockingPoint point) {
         if (trip.getStatus() != Trip.Status.AWAITING_DOCK) {
@@ -147,6 +149,9 @@ public class TripService {
         LocalDateTime end = clock.now();
         double cost = trip.getPricing().calculate(trip.durationMinutes(end));
         if (!trip.getPaymentMethod().charge(cost)) {
+            // The trip keeps running, so the vehicle must not stay recorded in the point: otherwise the next
+            // return attempt would lock the same vehicle into a second point.
+            point.release();
             throw new TripException("error.payment.declined");
         }
         trip.complete(point, end, cost);
