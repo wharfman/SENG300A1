@@ -5,7 +5,10 @@
  */
 package gocycle.fleet;
 
-/** The kinds of vehicle in the fleet, each with a display label. */
+/**
+ * The kinds of vehicle in the fleet. The label is the English one used in the control-room log; rider screens
+ * translate the constant through {@code LocalizationService} (key {@code VehicleType.<CONSTANT>}).
+ */
 public enum VehicleType {
     PEDAL_BIKE("Pedal bike"),
     E_BIKE("E-bike"),

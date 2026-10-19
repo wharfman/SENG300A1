@@ -6,6 +6,8 @@
  */
 package gocycle.payments;
 
+import gocycle.common.Message;
+
 /**
  * A way to pay. Trips depend only on this interface, never on a concrete payment kind. All amounts are
  * in dollars.
@@ -23,6 +25,6 @@ public interface PaymentMethod {
     /** Returns false when the charge is declined. */
     boolean charge(double amount);
 
-    /** Masked label safe to show on screens, e.g. "Credit card **** 1111". */
-    String describe();
+    /** Masked label safe to show on screens, e.g. "Credit card **** 1111" once translated. */
+    Message describe();
 }

@@ -17,13 +17,15 @@ import java.util.Locale;
  */
 public class ConsoleTextToSpeech implements TextToSpeech {
     private final PrintStream out;
+    private final LocalizationService localization;
 
-    public ConsoleTextToSpeech(PrintStream out) {
+    public ConsoleTextToSpeech(PrintStream out, LocalizationService localization) {
         this.out = out;
+        this.localization = localization;
     }
 
     @Override
     public void speak(String text, Locale locale) {
-        out.println(Ansi.paint("  ((( read aloud, " + locale.getLanguage() + " ))) " + text, Ansi.DIM));
+        out.println(Ansi.paint("  " + localization.text("kiosk.read.aloud", locale.getLanguage()) + " " + text, Ansi.DIM));
     }
 }

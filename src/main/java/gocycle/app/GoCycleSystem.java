@@ -48,7 +48,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
@@ -111,14 +110,14 @@ public final class GoCycleSystem {
         publisher.subscribe(crew);
 
         // Each station gets its own kiosk, but they all print to the same screen.
-        Supplier<StationKiosk> kiosks = () -> new StationKiosk(localization, new ConsoleTextToSpeech(kioskScreen), kioskScreen);
+        Supplier<StationKiosk> kiosks = () -> new StationKiosk(localization, new ConsoleTextToSpeech(kioskScreen, localization), kioskScreen);
         seedNetwork(config, kiosks, () -> random.nextDouble() >= lockFailureRate);
         seedRiders();
 
         // Built after seeding: the locator and the simulator need the final station list.
         outbox = dataDir.resolve("outbox");
         tripService = new TripService(clock, new StationLocator(stations),
-                List.of(new AppReceiptSender(), new EmailReceiptSender(outbox)), publisher);
+                List.of(new AppReceiptSender(), new EmailReceiptSender(outbox, localization)), publisher);
         simulator = new FleetSimulator(clock, stations, tripService, crew, controlRoom, random);
         OperatorDashboard dashboard = new OperatorDashboard(kioskScreen, clock, zones, vehicles, tripService,
                 faultService, crew);
@@ -227,11 +226,10 @@ public final class GoCycleSystem {
         vehicles.add(vehicle);
     }
 
-    /** One demo rider of each kind, with settings that show off the French kiosk, read-aloud and email receipts. */
+    /** One demo rider of each kind, with settings that show off read-aloud and email receipts. */
     private void seedRiders() {
         signUpCasual("Alex Chen", "alex.chen@example.com");
-        Rider sam = signUpMember("Sam Okafor", "sam.okafor@example.com");
-        sam.setPreferredLanguage(Locale.FRENCH);
+        signUpMember("Sam Okafor", "sam.okafor@example.com");
         Rider priya = signUpStudent("Priya Natarajan", "priya.natarajan@ucalgary.ca", "30123456");
         priya.setAudioAssist(true);
         priya.setReceiptDelivery(ReceiptDelivery.BOTH);
@@ -336,6 +334,7 @@ public final class GoCycleSystem {
         return simulator;
     }
 
+    /** The translation service, which also holds the system-wide screen language. */
     public LocalizationService getLocalization() {
         return localization;
     }

@@ -8,7 +8,8 @@ package gocycle.fleet;
 
 /**
  * Where a vehicle is in its lifecycle. Only {@link #AVAILABLE} vehicles can be rented. The label is
- * shown on screens and passed into kiosk messages untranslated.
+ * the English one used in the control-room log; rider screens and kiosk messages translate the constant
+ * through {@code LocalizationService} (key {@code VehicleStatus.<CONSTANT>}).
  */
 public enum VehicleStatus {
     AVAILABLE("Available"),

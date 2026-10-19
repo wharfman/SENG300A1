@@ -6,6 +6,7 @@
  */
 package gocycle.riders;
 
+import gocycle.common.Message;
 import gocycle.pricing.CasualPricing;
 import gocycle.pricing.LongTripSurcharge;
 import gocycle.pricing.PricingStrategy;
@@ -38,8 +39,8 @@ public class Student extends Rider {
     }
 
     @Override
-    public String getKind() {
-        return isVerified() ? "Student" : "Student (unverified)";
+    public Message getKind() {
+        return new Message(isVerified() ? "rider.kind.student" : "rider.kind.student.unverified");
     }
 
     public String getStudentNumber() {

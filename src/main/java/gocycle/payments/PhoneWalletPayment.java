@@ -6,6 +6,8 @@
  */
 package gocycle.payments;
 
+import gocycle.common.Message;
+
 import java.util.Objects;
 
 /**
@@ -25,8 +27,8 @@ public class PhoneWalletPayment extends AbstractPaymentMethod {
     }
 
     @Override
-    public String describe() {
-        return "Phone wallet";
+    public Message describe() {
+        return new Message("payment.wallet", getType());
     }
 
     public String getWalletToken() {

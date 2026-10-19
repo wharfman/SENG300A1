@@ -6,7 +6,8 @@
 package gocycle.faults;
 
 /**
- * Kind of fault, with the label shown to riders and operators. Only types that require a repair take
+ * Kind of fault. The label is the English one used in the control-room log and reports; rider screens
+ * translate the constant through {@code LocalizationService} (key {@code FaultType.<CONSTANT>}). Only types that require a repair take
  * the vehicle out of service and become maintenance-crew jobs.
  */
 public enum FaultType {

@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 /**
  * A trip rule stopped the request. Carries a kiosk message key so the screen can show it in the
- * rider's language.
+ * system language. Arguments may be enum constants or collections, which the kiosk translates too.
  */
 public class TripException extends RuntimeException {
     private final String messageKey;

@@ -2,10 +2,11 @@
  * GoCycle - SENG 300 Assignment 1
  *
  * Root of the riders package. TripService records trips against it, receipt senders deliver to it, and
- * StationKiosk reads its language and audio-assist preferences.
+ * StationKiosk reads its audio-assist preference.
  */
 package gocycle.riders;
 
+import gocycle.common.Message;
 import gocycle.pricing.PricingStrategy;
 import gocycle.trips.Receipt;
 import gocycle.trips.Trip;
@@ -13,7 +14,6 @@ import gocycle.trips.Trip;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -28,7 +28,6 @@ public abstract class Rider {
     private final String riderId;
     private final String name;
     private final String email;
-    private Locale preferredLanguage = Locale.ENGLISH;
     private boolean audioAssist;
     private ReceiptDelivery receiptDelivery = ReceiptDelivery.APP;
     private final List<Trip> trips = new ArrayList<>();
@@ -47,8 +46,8 @@ public abstract class Rider {
      */
     public abstract PricingStrategy getPricingStrategy();
 
-    /** Short label for screens, e.g. "Member". */
-    public abstract String getKind();
+    /** Short label for screens, e.g. "Member" once translated. */
+    public abstract Message getKind();
 
     public List<Trip> getTrips() {
         return Collections.unmodifiableList(trips);
@@ -88,14 +87,6 @@ public abstract class Rider {
         return email;
     }
 
-    public Locale getPreferredLanguage() {
-        return preferredLanguage;
-    }
-
-    public void setPreferredLanguage(Locale preferredLanguage) {
-        this.preferredLanguage = Objects.requireNonNull(preferredLanguage);
-    }
-
     /** Whether kiosk screens are also read aloud to this rider. */
     public boolean isAudioAssist() {
         return audioAssist;
@@ -113,8 +104,9 @@ public abstract class Rider {
         this.receiptDelivery = Objects.requireNonNull(receiptDelivery);
     }
 
+    /** The name alone: control-room log lines are English, and screens add the translated kind themselves. */
     @Override
     public String toString() {
-        return name + " (" + getKind() + ")";
+        return name;
     }
 }

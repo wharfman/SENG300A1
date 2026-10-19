@@ -5,6 +5,7 @@
  */
 package gocycle.riders;
 
+import gocycle.common.Message;
 import gocycle.pricing.CasualPricing;
 import gocycle.pricing.LongTripSurcharge;
 import gocycle.pricing.PricingStrategy;
@@ -21,7 +22,7 @@ public class CasualRider extends Rider {
     }
 
     @Override
-    public String getKind() {
-        return "Casual";
+    public Message getKind() {
+        return new Message("rider.kind.casual");
     }
 }

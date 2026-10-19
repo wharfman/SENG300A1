@@ -29,7 +29,7 @@ public abstract class Vehicle {
     /** Why this vehicle can't be rented right now; empty when it can. Subclasses add their own rules. */
     public Optional<RentalRefusal> checkRentable() {
         if (status != VehicleStatus.AVAILABLE) {
-            return Optional.of(new RentalRefusal("error.vehicle.unavailable", vehicleId, status.getLabel()));
+            return Optional.of(new RentalRefusal("error.vehicle.unavailable", vehicleId, status));
         }
         return Optional.empty();
     }

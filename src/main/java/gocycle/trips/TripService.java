@@ -72,10 +72,10 @@ public class TripService {
         });
         Zone zone = station.getZone();
         if (!zone.allows(method)) {
-            throw new TripException("error.payment.zone", method.describe(), zone.getName(), zone.describeAllowedPayments());
+            throw new TripException("error.payment.zone", method.getType(), zone.getName(), zone.getAllowedPayments());
         }
         DockingPoint point = station.findPointHolding(vehicle)
-                .orElseThrow(() -> new TripException("error.vehicle.unavailable", vehicle.getVehicleId(), "not docked here"));
+                .orElseThrow(() -> new TripException("error.vehicle.not.docked", vehicle.getVehicleId()));
         vehicle.checkRentable().ifPresent(refusal -> {
             throw new TripException(refusal.messageKey(), refusal.args());
         });

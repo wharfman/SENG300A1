@@ -6,19 +6,12 @@
  */
 package gocycle.payments;
 
-/** The kinds of payment GoCycle supports, each with a display label. One per {@link PaymentMethod} class. */
+/**
+ * The kinds of payment GoCycle supports, one per {@link PaymentMethod} class. Screens show the constant
+ * translated by {@code LocalizationService} (key {@code PaymentType.<CONSTANT>}).
+ */
 public enum PaymentType {
-    CREDIT_CARD("Credit card"),
-    TRANSIT_CARD("Transit card"),
-    PHONE_WALLET("Phone wallet");
-
-    private final String label;
-
-    PaymentType(String label) {
-        this.label = label;
-    }
-
-    public String getLabel() {
-        return label;
-    }
+    CREDIT_CARD,
+    TRANSIT_CARD,
+    PHONE_WALLET
 }

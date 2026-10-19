@@ -6,6 +6,7 @@
  */
 package gocycle.riders;
 
+import gocycle.common.Message;
 import gocycle.pricing.CasualPricing;
 import gocycle.pricing.LongTripSurcharge;
 import gocycle.pricing.MemberPricing;
@@ -44,8 +45,8 @@ public class Member extends Rider {
     }
 
     @Override
-    public String getKind() {
-        return isActive() ? "Member" : "Member (lapsed)";
+    public Message getKind() {
+        return new Message(isActive() ? "rider.kind.member" : "rider.kind.member.lapsed");
     }
 
     public double getMonthlyFee() {

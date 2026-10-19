@@ -90,8 +90,9 @@ public final class TestNetwork {
     }
 
     private DockingStation station(String name, double latitude, double longitude, int points) {
-        StationKiosk kiosk = new StationKiosk(new InMemoryLocalizationService(),
-                new ConsoleTextToSpeech(new PrintStream(OutputStream.nullOutputStream())),
+        InMemoryLocalizationService localization = new InMemoryLocalizationService();
+        StationKiosk kiosk = new StationKiosk(localization,
+                new ConsoleTextToSpeech(new PrintStream(OutputStream.nullOutputStream()), localization),
                 new PrintStream(OutputStream.nullOutputStream()));
         // The lambda reads the field on every dock, so tests can change lockWorks after construction.
         DockingStation station = new DockingStation(name, name, latitude, longitude, points, kiosk, () -> lockWorks);
