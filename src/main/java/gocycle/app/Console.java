@@ -21,8 +21,8 @@ import java.util.Locale;
 /**
  * Numbered-menu input and output for the rider terminal. Every read blocks until a line arrives, re-prompts
  * on invalid input, and throws {@link InputClosedException} at end of input. Its own fixed text ("Back",
- * hints) follows the system language. Not thread-safe; only the menu
- * thread uses it, and never while holding the {@link GoCycleSystem#atomically} lock.
+ * hints) follows the system language, and every menu title it shows goes to {@link ReadAloud}. Not
+ * thread-safe; only the menu thread uses it, and never while holding the {@link GoCycleSystem#atomically} lock.
  */
 final class Console {
     /** Thrown when standard input closes, e.g. Ctrl+Z / Ctrl+D. */
@@ -32,11 +32,13 @@ final class Console {
     private final BufferedReader in;
     private final PrintStream out;
     private final LocalizationService l10n;
+    private final ReadAloud readAloud;
 
-    Console(InputStream in, PrintStream out, LocalizationService l10n) {
+    Console(InputStream in, PrintStream out, LocalizationService l10n, ReadAloud readAloud) {
         this.in = new BufferedReader(new InputStreamReader(in));
         this.out = out;
         this.l10n = l10n;
+        this.readAloud = readAloud;
     }
 
     void say(String text) {
@@ -114,10 +116,14 @@ final class Console {
         }
     }
 
-    /** Shows numbered options plus "0) Back"; returns the chosen index, or -1 for back. */
+    /**
+     * Shows {@code title} (read aloud when that setting is on), numbered options and "0) Back"; returns the
+     * chosen index, or -1 for back.
+     */
     int choose(String title, List<String> options) {
         say("");
         say(Ansi.paint(title, Ansi.BOLD));
+        readAloud.header(title);
         for (int i = 0; i < options.size(); i++) {
             say("  " + (i + 1) + ") " + options.get(i));
         }

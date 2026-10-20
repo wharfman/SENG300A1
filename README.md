@@ -18,7 +18,7 @@ You need a JDK 24+ and Maven.
 5. Return my vehicle (full stations redirect you to the nearest free point; the trip ends only once the lock is confirmed)
 6. Report a problem with a vehicle
 7. My trips and receipts
-8. Language and receipt settings
+8. Language, read-aloud and receipt settings
 9. Exit
 
 Seeded data: Eau Claire starts full (to try the redirect), ES-301 and EB-205 are below 20% battery, Kensington doesn't accept credit cards. Zone payments and branding are set in `config/zones.properties`.
