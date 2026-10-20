@@ -1,4 +1,5 @@
 # SENG300 Assignment 1 - GoCycle
+Original Github Repository: https://github.com/wharfman/SENG300A1
 
 ```text
 Gavin Kyle - 30196910 
@@ -18,7 +19,7 @@ mvn test       # compile and run the JUnit tests
 mvn package    # run the tests and build target/gocycle-0.1.0-SNAPSHOT.jar
 ```
 
-## Run it
+## Run 
 
 You need a JDK 24+ and Maven.
 
