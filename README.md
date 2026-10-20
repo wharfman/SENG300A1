@@ -2,6 +2,9 @@
 
 ```text
 Gavin Kyle - 30196910 
+Omar Almishri - 30246524
+Ethan Bryant - 30234163
+Matthew hajas -30213765
 ```
 ## Build
 
