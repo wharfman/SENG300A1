@@ -3,11 +3,23 @@
 ```text
 Gavin Kyle - 30196910 
 ```
+## Build
+
+You need a JDK 24+ and Maven. Maven must run on that JDK: if `java -version` shows an older version, set `JAVA_HOME` to your JDK 24 folder first.
+
+Run these from the project folder:
+
+```text
+mvn compile    # compile the code into target/classes
+mvn test       # compile and run the JUnit tests
+mvn package    # run the tests and build target/gocycle-0.1.0-SNAPSHOT.jar
+```
+
 ## Run it
 
 You need a JDK 24+ and Maven.
 
-- **Windows:** double-click `start-gocycle.cmd`, or run `run-rider.cmd`.
+- **Windows:** run `start-gocycle.cmd` for separate terminal, or run `run-rider.cmd` for built in terminal.
 
 ## Rider menu
 
@@ -28,5 +40,4 @@ Seeded data: Eau Claire starts full (to try the redirect), ES-301 and EB-205 are
 -   Repairs: the maintenance crew fixes broken vehicles after 45 simulated minutes.
 -   Rebalancing: every 30 minutes, one ready vehicle is moved automatically from a full station to an empty one.
 -   Rider terminal: Runs a simulated clock where each real second is 15 seconds of trip time, so batteries, costs and repairs keep moving on their own.
--   Zone Payment: Credit cards refused in Kensington
 -   Charging: Electric vehicles recharge overtime
