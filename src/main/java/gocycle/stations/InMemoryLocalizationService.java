@@ -38,13 +38,13 @@ public class InMemoryLocalizationService implements LocalizationService {
         fr("kiosk.welcome", "Bienvenue à la station {0}.");
 
         en("kiosk.unlocked", "{0} is unlocked from point {1}. A refundable deposit of {2} is on hold. Enjoy your ride!");
-        fr("kiosk.unlocked", "Le véhicule {0} est déverrouillé au point {1}. Un dépôt remboursable de {2} est retenu. Bonne route !");
+        fr("kiosk.unlocked", "Le véhicule {0} est déverrouillé du point d'ancrage {1}. Un dépôt remboursable de {2} est retenu. Bonne route !");
 
         en("kiosk.station.full", "This station is full. The nearest station with a free point is {0}, {1} km away. Your trip keeps running until the vehicle is locked.");
-        fr("kiosk.station.full", "Cette station est pleine. La station la plus proche avec un point libre est {0}, à {1} km. Votre trajet continue jusqu'au verrouillage du véhicule.");
+        fr("kiosk.station.full", "Cette station est pleine. La station la plus proche avec un point d'ancrage libre est {0}, à {1} km. Votre trajet continue jusqu'au verrouillage du véhicule.");
 
         en("kiosk.dock.instruction", "Please push {0} into point {1}.");
-        fr("kiosk.dock.instruction", "Veuillez pousser {0} dans le point {1}.");
+        fr("kiosk.dock.instruction", "Veuillez insérer le véhicule {0} dans le point d'ancrage {1}.");
 
         en("kiosk.trip.ended", "Vehicle locked. Trip ended after {0} min. Charged {1}. Your {2} deposit has been released.");
         fr("kiosk.trip.ended", "Véhicule verrouillé. Trajet terminé après {0} min. Montant facturé : {1}. Votre dépôt de {2} a été libéré.");
@@ -62,25 +62,25 @@ public class InMemoryLocalizationService implements LocalizationService {
         fr("error.vehicle.unavailable", "Le véhicule {0} ne peut pas être loué pour le moment ({1}).");
 
         en("error.vehicle.not.docked", "{0} is not docked at this station.");
-        fr("error.vehicle.not.docked", "Le véhicule {0} n'est pas amarré à cette station.");
+        fr("error.vehicle.not.docked", "Le véhicule {0} n'est pas ancré à cette station.");
 
         en("error.battery.low", "{0} has only {1}% battery. Electric vehicles need at least {2}% to rent.");
-        fr("error.battery.low", "Le véhicule {0} n'a que {1} % de batterie. Il faut au moins {2} % pour louer un véhicule électrique.");
+        fr("error.battery.low", "Le véhicule {0} n'a que {1} % de batterie. Il faut au moins {2} % de charge pour louer un véhicule électrique.");
 
         en("error.payment.zone", "{0} is not accepted in the {1} zone. Accepted here: {2}.");
         fr("error.payment.zone", "Mode de paiement refusé dans la zone {1} : {0}. Modes acceptés : {2}.");
 
         en("error.not.locked", "The vehicle is not locked at point {0}. Your trip is still running.");
-        fr("error.not.locked", "Le véhicule n'est pas verrouillé au point {0}. Votre trajet continue.");
+        fr("error.not.locked", "Le véhicule n'est pas verrouillé au point d'ancrage {0}. Votre trajet continue.");
 
         en("error.lock.failed", "Lock not detected at point {0}. Your trip is still running. Please push the vehicle in again.");
-        fr("error.lock.failed", "Verrouillage non détecté au point {0}. Votre trajet continue. Veuillez pousser le véhicule de nouveau.");
+        fr("error.lock.failed", "Verrouillage non détecté au point d'ancrage {0}. Votre trajet continue. Veuillez réinsérer le véhicule.");
 
         en("error.payment.declined", "The payment was declined, so the vehicle has been unlocked again. Your trip is still running.");
         fr("error.payment.declined", "Le paiement a été refusé : le véhicule a donc été déverrouillé. Votre trajet continue.");
 
         en("error.network.full", "No station has a free point right now. Your trip is still running; please wait here.");
-        fr("error.network.full", "Aucune station n'a de point libre pour le moment. Votre trajet continue ; veuillez patienter ici.");
+        fr("error.network.full", "Aucune station n'a de point d'ancrage libre pour le moment. Votre trajet continue ; veuillez patienter ici.");
     }
 
     /** Text printed by RiderApp and Console. Prompts keep their trailing ": " so input lines up after them. */
@@ -107,14 +107,14 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("menu.7", "My trips and receipts");
         fr("menu.7", "Mes trajets et reçus");
         en("menu.8", "Language, read-aloud and receipt settings");
-        fr("menu.8", "Langue, lecture à voix haute et reçus");
+        fr("menu.8", "Paramètres : langue, lecture à voix haute et reçus");
         en("menu.9", "Exit");
         fr("menu.9", "Quitter");
         en("menu.header", "GoCycle main menu");
         fr("menu.header", "Menu principal de GoCycle");
 
         en("console.number.range", "Please enter a number from {0} to {1}.");
-        fr("console.number.range", "Veuillez entrer un nombre de {0} à {1}.");
+        fr("console.number.range", "Veuillez entrer un nombre entre {0} et {1}.");
         en("console.yes.no", " (y/n): ");
         fr("console.yes.no", " (o/n) : ");
         en("console.back", "Back");
@@ -158,32 +158,32 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("stations.ask.return", "Which station are you returning to?");
         fr("stations.ask.return", "À quelle station rendez-vous le véhicule ?");
         en("stations.ask.fault", "Which station is it at?");
-        fr("stations.ask.fault", "À quelle station se trouve-t-il ?");
+        fr("stations.ask.fault", "À quelle station se trouve le véhicule ?");
 
         en("vehicle.battery", "battery {0}%");
         fr("vehicle.battery", "batterie {0} %");
         en("vehicle.ready", "ready");
         fr("vehicle.ready", "disponible");
         en("vehicle.battery.too.low", "battery too low to rent");
-        fr("vehicle.battery.too.low", "batterie trop faible pour louer");
+        fr("vehicle.battery.too.low", "batterie trop faible pour la location");
 
         en("start.already.riding", "You are already on trip {0}. Return that vehicle first (option 5).");
         fr("start.already.riding", "Vous êtes déjà en trajet ({0}). Rendez d'abord ce véhicule (option 5).");
         en("start.no.vehicles", "No vehicles are docked here right now.");
-        fr("start.no.vehicles", "Aucun véhicule n'est amarré ici pour le moment.");
+        fr("start.no.vehicles", "Aucun véhicule n'est ancré ici pour le moment.");
         en("start.choose.vehicle", "Choose a vehicle");
         fr("start.choose.vehicle", "Choisissez un véhicule");
 
         en("pay.ask", "How would you like to pay?");
         fr("pay.ask", "Comment souhaitez-vous payer ?");
         en("pay.not.accepted", "(not accepted in {0})");
-        fr("pay.not.accepted", "(mode refusé dans {0})");
+        fr("pay.not.accepted", "(mode refusé dans la zone {0})");
         en("pay.credit.number", "Credit card number");
         fr("pay.credit.number", "Numéro de carte de crédit");
         en("pay.transit.number", "Transit card number");
         fr("pay.transit.number", "Numéro de carte de transport");
         en("pay.card.prompt", "{0} (Enter for demo card {1}): ");
-        fr("pay.card.prompt", "{0} (Entrée pour la carte démo {1}) : ");
+        fr("pay.card.prompt", "{0} (Entrée pour la carte de démonstration {1}) : ");
         en("pay.card.too.short", "Please enter at least 4 digits.");
         fr("pay.card.too.short", "Veuillez entrer au moins 4 chiffres.");
         en("pay.wallet.paired", "Phone wallet paired.");
@@ -205,9 +205,9 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("return.riding.to", "Riding to {0} ({1} min)...");
         fr("return.riding.to", "En route vers {0} ({1} min)...");
         en("return.point.taken", "Someone just took the last free point. Choose option 5 again to be sent to the nearest free point.");
-        fr("return.point.taken", "Quelqu'un vient de prendre le dernier point libre. Choisissez de nouveau l'option 5 pour être dirigé vers le point libre le plus proche.");
+        fr("return.point.taken", "Quelqu'un vient de prendre le dernier point d'ancrage libre. Choisissez de nouveau l'option 5 pour être dirigé vers le point d'ancrage libre le plus proche.");
         en("return.push", "Press Enter to push the vehicle into point {0}...");
-        fr("return.push", "Appuyez sur Entrée pour pousser le véhicule dans le point {0}...");
+        fr("return.push", "Appuyez sur Entrée pour insérer le véhicule dans le point d'ancrage {0}...");
         en("return.receipt", "Receipt {0}.");
         fr("return.receipt", "Reçu {0}.");
         en("return.receipt.app", "sent to your app inbox (option 7)");
@@ -222,11 +222,11 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("fault.riding", "The vehicle I'm riding ({0})");
         fr("fault.riding", "Le véhicule que j'utilise ({0})");
         en("fault.docked", "A vehicle docked at a station");
-        fr("fault.docked", "Un véhicule amarré à une station");
+        fr("fault.docked", "Un véhicule ancré à une station");
         en("fault.ask.where", "Which vehicle has the problem?");
         fr("fault.ask.where", "Quel véhicule a un problème ?");
         en("fault.none.docked", "No vehicles are docked there.");
-        fr("fault.none.docked", "Aucun véhicule n'est amarré à cette station.");
+        fr("fault.none.docked", "Aucun véhicule n'est ancré à cette station.");
         en("fault.ask.vehicle", "Which vehicle?");
         fr("fault.ask.vehicle", "Quel véhicule ?");
         en("fault.ask.type", "What is wrong?");
@@ -234,9 +234,9 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("fault.ask.note", "Anything else we should know? (optional): ");
         fr("fault.ask.note", "Autre chose à signaler ? (facultatif) : ");
         en("fault.filed", "Report {0} filed. The control room can see it now.");
-        fr("fault.filed", "Rapport {0} enregistré. La salle de contrôle peut le voir maintenant.");
+        fr("fault.filed", "Signalement {0} enregistré. La salle de contrôle peut le voir maintenant.");
         en("fault.return.vehicle", "Please return {0} to a station; it goes out of service once docked.");
-        fr("fault.return.vehicle", "Veuillez rapporter le véhicule {0} à une station ; il sera mis hors service une fois amarré.");
+        fr("fault.return.vehicle", "Veuillez rapporter le véhicule {0} à une station ; il sera mis hors service une fois ancré.");
         en("fault.notice", "Your {0} {1} reported: {2} ({3}% battery)");
         fr("fault.notice", "Le véhicule {1} ({0}) a signalé : {2} (batterie {3} %)");
 
@@ -245,7 +245,7 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("trips.none", "No trips yet.");
         fr("trips.none", "Aucun trajet pour l'instant.");
         en("trips.in.progress", "in progress, {0} so far");
-        fr("trips.in.progress", "en cours, {0} jusqu'ici");
+        fr("trips.in.progress", "en cours, {0} jusqu'à présent");
         en("trips.paid", "{0} paid");
         fr("trips.paid", "{0} payé");
         en("trips.inbox", "App inbox: {0} receipt(s)");
@@ -281,11 +281,11 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("status.riding", "riding");
         fr("status.riding", "en route");
         en("status.docking", "docking at {0}");
-        fr("status.docking", "amarrage à {0}");
+        fr("status.docking", "ancrage à {0}");
         en("status.from", "from {0}");
         fr("status.from", "depuis {0}");
         en("status.so.far", "{0} so far");
-        fr("status.so.far", "{0} jusqu'ici");
+        fr("status.so.far", "{0} jusqu'à présent");
         en("status.deposit", "{0} deposit held");
         fr("status.deposit", "dépôt de {0} retenu");
 
@@ -303,7 +303,7 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("receipt.charged", "  Charged   {0} to {1}");
         fr("receipt.charged", "  Facturé   {0} sur {1}");
         en("receipt.deposit", "  Deposit   {0} hold released");
-        fr("receipt.deposit", "  Dépôt     retenue de {0} libérée");
+        fr("receipt.deposit", "  Dépôt     {0} libéré");
         en("receipt.issued", "  Issued    {0}");
         fr("receipt.issued", "  Émis le   {0}");
         en("email.to", "To: {0}");
@@ -336,7 +336,7 @@ public class InMemoryLocalizationService implements LocalizationService {
         fr("rider.kind.student.unverified", "Étudiant (non vérifié)");
 
         en("VehicleType.PEDAL_BIKE", "Pedal bike");
-        fr("VehicleType.PEDAL_BIKE", "Vélo");
+        fr("VehicleType.PEDAL_BIKE", "Vélo classique");
         en("VehicleType.E_BIKE", "E-bike");
         fr("VehicleType.E_BIKE", "Vélo électrique");
         en("VehicleType.E_SCOOTER", "E-scooter");
@@ -345,7 +345,7 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("VehicleStatus.AVAILABLE", "Available");
         fr("VehicleStatus.AVAILABLE", "Disponible");
         en("VehicleStatus.IN_USE", "In use");
-        fr("VehicleStatus.IN_USE", "En utilisation");
+        fr("VehicleStatus.IN_USE", "En cours d'utilisation");
         en("VehicleStatus.OUT_OF_SERVICE", "Out of service");
         fr("VehicleStatus.OUT_OF_SERVICE", "Hors service");
         en("VehicleStatus.IN_TRANSIT", "In transit");

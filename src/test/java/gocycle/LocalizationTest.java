@@ -139,7 +139,7 @@ class LocalizationTest {
 
         assertTrue(english.contains("Vehicle   PB-1 (Pedal bike)"), english);
         assertTrue(english.contains("Charged   $4.75 to Credit card **** 1111"), english);
-        assertTrue(french.contains("Véhicule  PB-1 (Vélo)"), french);
+        assertTrue(french.contains("Véhicule  PB-1 (Vélo classique)"), french);
         assertTrue(french.contains("Tarif     $1.25 de déverrouillage + $0.35/min, +$5.00 au-delà de 120 min"), french);
         assertTrue(french.contains("Facturé   $4.75 sur Carte de crédit **** 1111"), french);
     }
