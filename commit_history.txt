@@ -1,0 +1,60 @@
+*   87fcd54 - Gavin Kyle, in the future : Merge pull request #19 from wharfman/fix/final-iterations  (origin/main, origin/HEAD)
+|\  
+| * 1e9167c - wharfman, 42 seconds ago : Added github repository link  (HEAD -> fix/final-iterations, origin/fix/final-iterations)
+* | 372e1c7 - Gavin Kyle, 8 minutes ago : Merge pull request #18 from wharfman/fix/final-iterations 
+|\| 
+| * 02f7b80 - wharfman, 10 minutes ago : Names, UCID, emails, and final report 
+* | e6448d0 - Gavin Kyle, 2 hours ago : Merge pull request #17 from wharfman/fix/final-iterations 
+|\| 
+| * 514dea6 - wharfman, 2 hours ago : Citation for code 
+* | f1112ea - Gavin Kyle, 2 hours ago : Merge pull request #16 from wharfman/fix/final-iterations 
+|\| 
+| * 8a72548 - wharfman, 2 hours ago : README build instructions 
+* | d7e9a20 - Gavin Kyle, 3 hours ago : Merge pull request #15 from wharfman/feat/menu-text-to-speech 
+|\| 
+| * 85fdce2 - wharfman, 3 hours ago : Fixed incorrect english to french translated words  (origin/feat/menu-text-to-speech, feat/menu-text-to-speech)
+* | a7716bb - Gavin Kyle, 3 hours ago : Merge pull request #14 from wharfman/feat/menu-text-to-speech 
+|\| 
+| * fa7a91e - wharfman, 3 hours ago : Implemented working text to speech option for all menu headings 
+* | c6ee6f4 - Gavin Kyle, 7 hours ago : Merge pull request #13 from wharfman/fix/bugfixes 
+|\| 
+| * e8e3ec5 - wharfman, 7 hours ago : Removed redundant/unused getters that nothing calls.  (origin/fix/bugfixes, fix/bugfixes)
+* | 297a8f7 - Gavin Kyle, 8 hours ago : Merge pull request #12 from wharfman/fix/bugfixes 
+|\| 
+| * 608e143 - wharfman, 8 hours ago : Fixed where a declined charge locks the vehicle but it is still labeled in use and billing the user. 
+* | 9eb80c1 - Gavin Kyle, 9 hours ago : Merge pull request #11 from wharfman/fix/bugfixes 
+|\| 
+| * ca1dd76 - wharfman, 9 hours ago : Fixed failed vehicle restationing causes vehicle to disapear. 
+* | 002b5ff - Gavin Kyle, 9 hours ago : Merge pull request #10 from wharfman/fix/bugfixes 
+|\| 
+| * 56f9ba0 - wharfman, 9 hours ago : Fixed failed email receipt crashing the app after the rider has been charged. 
+* | ec7aeec - Gavin Kyle, 10 hours ago : Merge pull request #9 from wharfman/fix/bugfixes 
+|\| 
+| * d7a7c80 - wharfman, 10 hours ago : Fixed duplicate value when selecting to pass time, causing 30 seconds to pass rather than 15. 
+* | 834242f - Gavin Kyle, 11 hours ago : Merge pull request #8 from wharfman/feature/gocycle-skeleton 
+|\| 
+| * 2a4d1be - wharfman, 11 hours ago : Fully working French language option. Works for all menus and submenus.  (origin/feature/gocycle-skeleton, feature/gocycle-skeleton)
+* | 2e4d76a - Gavin Kyle, 12 hours ago : Merge pull request #7 from wharfman/feature/gocycle-skeleton 
+|\| 
+| * e9d6c0a - wharfman, 12 hours ago : Comments for all files/classes, email file as well as readme changed 
+* | 6e26d4e - Gavin Kyle, 30 hours ago : Merge pull request #6 from wharfman/feature/gocycle-skeleton 
+|\| 
+| * 3f94196 - wharfman, 30 hours ago : README file with startup instructions, emails, menu overview, and general notes on function 
+* | f120a7f - Gavin Kyle, 30 hours ago : Merge pull request #5 from wharfman/feature/gocycle-skeleton 
+|\| 
+| * f479324 - wharfman, 30 hours ago : Terminal interface and tests with working time counter, billing, maintanence, charging, and battery depletion. Multi-language + text to speech WIP 
+* | 533b382 - Gavin Kyle, 31 hours ago : Merge pull request #4 from wharfman/feature/gocycle-skeleton 
+|\| 
+| * acb86a4 - wharfman, 31 hours ago : Operator side, maintanence, and vehicle issue report 
+* | 718e042 - Gavin Kyle, 31 hours ago : Merge pull request #3 from wharfman/feature/gocycle-skeleton 
+|\| 
+| * 30f495a - wharfman, 31 hours ago : Payment methods and receipt delivery 
+* | aa0e0ff - Gavin Kyle, 31 hours ago : Merge pull request #2 from wharfman/feature/gocycle-skeleton 
+|\| 
+| * 2ee4629 - wharfman, 31 hours ago : All rider types, pricing, and pricing per rider type 
+* | 72f9505 - Gavin Kyle, 31 hours ago : Merge pull request #1 from wharfman/feature/implement-station-zone-vehicle 
+|\| 
+| * 10c4b48 - wharfman, 31 hours ago : All vehicles types, docking stations status, and zones implemented. 
+|/  
+* 840bae8 - wharfman, 33 hours ago : Project Structure Skeleton  (main)
+* 603e270 - Gavin Kyle, 34 hours ago : Initial commit 
