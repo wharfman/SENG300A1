@@ -106,10 +106,12 @@ public class InMemoryLocalizationService implements LocalizationService {
         fr("menu.6", "Signaler un problème avec un véhicule");
         en("menu.7", "My trips and receipts");
         fr("menu.7", "Mes trajets et reçus");
-        en("menu.8", "Language and receipt settings");
-        fr("menu.8", "Langue et reçus");
+        en("menu.8", "Language, read-aloud and receipt settings");
+        fr("menu.8", "Langue, lecture à voix haute et reçus");
         en("menu.9", "Exit");
         fr("menu.9", "Quitter");
+        en("menu.header", "GoCycle main menu");
+        fr("menu.header", "Menu principal de GoCycle");
 
         en("console.number.range", "Please enter a number from {0} to {1}.");
         fr("console.number.range", "Veuillez entrer un nombre de {0} à {1}.");
@@ -141,6 +143,8 @@ public class InMemoryLocalizationService implements LocalizationService {
         en("rider.welcome", "Welcome, {0}. Your fare: {1}");
         fr("rider.welcome", "Bienvenue, {0}. Votre tarif : {1}");
 
+        en("stations.title", "All stations and vehicles");
+        fr("stations.title", "Toutes les stations et tous les véhicules");
         en("stations.zone", " {0} zone ");
         fr("stations.zone", " Zone {0} ");
         en("stations.accepts", "  accepts {0}");
@@ -253,6 +257,16 @@ public class InMemoryLocalizationService implements LocalizationService {
         fr("settings.title", "Paramètres : {0}");
         en("settings.language", "Language: {0}");
         fr("settings.language", "Langue : {0}");
+        en("settings.read.aloud", "Read menu titles aloud: {0}");
+        fr("settings.read.aloud", "Lecture des titres de menu à voix haute : {0}");
+        en("settings.on", "on");
+        fr("settings.on", "activée");
+        en("settings.off", "off");
+        fr("settings.off", "désactivée");
+        en("settings.unavailable", "not available on this computer");
+        fr("settings.unavailable", "non disponible sur cet ordinateur");
+        en("settings.read.aloud.unavailable", "Text-to-speech is not available on this computer.");
+        fr("settings.read.aloud.unavailable", "La synthèse vocale n'est pas disponible sur cet ordinateur.");
         en("settings.receipts", "Receipts: {0}");
         fr("settings.receipts", "Reçus : {0}");
         en("settings.choose.language", "Screen language");

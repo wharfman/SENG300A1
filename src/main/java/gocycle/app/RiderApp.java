@@ -61,15 +61,17 @@ public final class RiderApp {
 
     private final GoCycleSystem system;
     private final Console console;
+    private final ReadAloud readAloud;
     private final LocalizationService l10n;
     // Filled by noticeForCurrentRider, which can run on the clock thread; drained by the menu thread.
     private final Queue<String> notices = new ConcurrentLinkedQueue<>();
     // Written only by the menu thread, but also read by noticeForCurrentRider on the clock thread.
     private volatile Rider rider;
 
-    RiderApp(GoCycleSystem system, Console console) {
+    RiderApp(GoCycleSystem system, Console console, ReadAloud readAloud) {
         this.system = system;
         this.console = console;
+        this.readAloud = readAloud;
         this.l10n = system.getLocalization();
         this.rider = system.getRiders().get(0);
         system.getPublisher().subscribe(this::noticeForCurrentRider);
@@ -77,7 +79,8 @@ public final class RiderApp {
 
     public static void main(String[] args) {
         GoCycleSystem system = GoCycleSystem.create();
-        new RiderApp(system, new Console(System.in, System.out, system.getLocalization())).run();
+        ReadAloud readAloud = new ReadAloud(SystemTextToSpeech.detect(), system.getLocalization());
+        new RiderApp(system, new Console(System.in, System.out, system.getLocalization(), readAloud), readAloud).run();
     }
 
     /** Starts the clock and loops over the menu until the rider picks Exit or input closes. */
@@ -91,6 +94,8 @@ public final class RiderApp {
                 for (String notice; (notice = notices.poll()) != null; ) {
                     console.say(Ansi.paint("  ! " + notice, Ansi.YELLOW, Ansi.BOLD));
                 }
+                // The main menu has no printed title, so a short spoken one stands in for it.
+                readAloud.header(t("menu.header"));
                 for (int i = 1; i <= MENU_SIZE; i++) {
                     console.say("  " + i + ") " + t("menu." + i));
                 }
@@ -104,6 +109,7 @@ public final class RiderApp {
             // input closed: exit like option 9
         }
         system.shutdown();
+        readAloud.close();
         console.say(t("app.goodbye"));
     }
 
@@ -156,8 +162,11 @@ public final class RiderApp {
     // ---------------------------------------------------------------- 2. stations
 
     private void showStations() {
+        String title = t("stations.title");
+        readAloud.header(title);
         console.say(system.atomically(() -> {
-            StringBuilder b = new StringBuilder();
+            StringBuilder b = new StringBuilder(System.lineSeparator());
+            b.append(Ansi.paint(title, Ansi.BOLD)).append(System.lineSeparator());
             for (Zone zone : system.getZones()) {
                 b.append(System.lineSeparator())
                         .append(Ansi.paint(t("stations.zone", zone.getName()), Ansi.BOLD,
@@ -437,9 +446,11 @@ public final class RiderApp {
     // ---------------------------------------------------------------- 7. trips
 
     private void showTrips() {
+        String title = system.atomically(() -> t("trips.title", riderLabel(rider)));
+        readAloud.header(title);
         console.say(system.atomically(() -> {
             StringBuilder b = new StringBuilder(System.lineSeparator());
-            b.append(Ansi.paint(t("trips.title", riderLabel(rider)), Ansi.BOLD)).append(System.lineSeparator());
+            b.append(Ansi.paint(title, Ansi.BOLD)).append(System.lineSeparator());
             if (rider.getTrips().isEmpty()) {
                 b.append("  ").append(t("trips.none")).append(System.lineSeparator());
             }
@@ -468,11 +479,14 @@ public final class RiderApp {
 
     // ---------------------------------------------------------------- 8. settings
 
-    /** The language here is the system-wide one; the receipt setting belongs to the signed-in rider. */
+    /** Language and read-aloud are system-wide; the receipt setting belongs to the signed-in rider. */
     private void settings() {
         while (true) {
+            String readAloudState = !readAloud.isAvailable() ? t("settings.unavailable")
+                    : t(readAloud.isOn() ? "settings.on" : "settings.off");
             List<String> options = system.atomically(() -> List.of(
                     t("settings.language", languageName(l10n.getLanguage())),
+                    t("settings.read.aloud", readAloudState),
                     t("settings.receipts", rider.getReceiptDelivery())));
             int pick = console.choose(t("settings.title", rider.getName()), options);
             switch (pick) {
@@ -484,6 +498,13 @@ public final class RiderApp {
                     }
                 }
                 case 1 -> {
+                    if (readAloud.isAvailable()) {
+                        readAloud.setOn(!readAloud.isOn());
+                    } else {
+                        console.say(t("settings.read.aloud.unavailable"));
+                    }
+                }
+                case 2 -> {
                     List<ReceiptDelivery> channels = List.of(ReceiptDelivery.values());
                     int c = console.choose(t("settings.choose.receipts"), channels.stream().map(l10n::render).toList());
                     if (c >= 0) {
